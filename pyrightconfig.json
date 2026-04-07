@@ -1,0 +1,9 @@
+{
+  "include": ["backend/src", "backend/tests", "frontend/src"],
+  "executionEnvironments": [
+    {
+      "root": "backend",
+      "extraPaths": ["src"]
+    }
+  ]
+}
