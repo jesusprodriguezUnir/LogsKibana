@@ -206,6 +206,7 @@ export default function RabbitExtractor() {
   const [copied, setCopied] = useState(false);
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [selectedRabbitNames, setSelectedRabbitNames] = useState<string[]>([...RABBIT_NAMES]);
+  const [modalRow, setModalRow] = useState<RabbitRow | null>(null);
 
   const rabbitRows = useMemo<RabbitRow[]>(() => {
     return rows
@@ -343,6 +344,52 @@ export default function RabbitExtractor() {
     URL.revokeObjectURL(url);
   };
 
+  const downloadZipFromServer = async () => {
+    if (!sessionId || filteredRows.length === 0) return;
+    try {
+      const messageText = selectedRabbitNames.length > 0 ? selectedRabbitNames.map(encodeURIComponent).join("|") : "";
+      const params = new URLSearchParams({ session_id: sessionId });
+      if (messageText) params.set("message_text", selectedRabbitNames.join("|"));
+      const url = `/export_zip?${params.toString()}`;
+      const resp = await fetch(url);
+      if (!resp.ok) throw new Error(`Error en export ZIP: ${resp.statusText}`);
+      const blob = await resp.blob();
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = `rabbit_messages_${new Date().toISOString().replace(/[:.]/g, "-")}.zip`;
+      a.click();
+      URL.revokeObjectURL(downloadUrl);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : "Error desconocido";
+      setError(msg);
+    }
+  };
+
+  const openModal = (row: RabbitRow) => setModalRow(row);
+  const closeModal = () => setModalRow(null);
+
+  const downloadSingleMessage = (row: RabbitRow) => {
+    const filename = `message_${row.rabbitName}_${row.timestamp.replace(/[:.]/g, "-")}.txt`;
+    const meta = {
+      timestamp: row.timestamp,
+      service: row.service,
+      logger: row.logger,
+      location: row.location,
+      error_type: row.errorType,
+      log_error: row.logError,
+      parse_error: row.parseError,
+    };
+    const content = `METADATA:\n${JSON.stringify(meta, null, 2)}\n\nMESSAGE:\n${JSON.stringify(row.rabbitPayload, null, 2)}`;
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div style={{ maxWidth: 900, margin: '2rem auto', padding: 24, background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px #0001' }}>
       <h2>Extractor de mensajes RabbitMQ</h2>
@@ -409,6 +456,14 @@ export default function RabbitExtractor() {
             Copiar mensajes filtrados
           </button>
           <button
+            onClick={downloadZipFromServer}
+            type="button"
+            style={{ marginBottom: 12, marginLeft: 8 }}
+            disabled={filteredRows.length === 0 || !sessionId}
+          >
+            Descargar ZIP (server)
+          </button>
+          <button
             onClick={downloadFilteredJson}
             type="button"
             style={{ marginBottom: 12, marginLeft: 8 }}
@@ -436,6 +491,10 @@ export default function RabbitExtractor() {
                     <td style={{ border: '1px solid #eee', padding: 4, fontFamily: 'monospace' }}>
                       <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{JSON.stringify(row.rabbitPayload, null, 2)}</pre>
                     </td>
+                    <td style={{ border: '1px solid #eee', padding: 4, whiteSpace: 'nowrap' }}>
+                      <button onClick={() => openModal(row)} title="Ver detalle" style={{ marginRight: 6 }}>🔍</button>
+                      <button onClick={() => downloadSingleMessage(row)} title="Descargar este mensaje">⬇️</button>
+                    </td>
                     <td style={{ border: '1px solid #eee', padding: 4, whiteSpace: 'nowrap' }}>{row.errorType}</td>
                     <td style={{ border: '1px solid #eee', padding: 4, color: row.logError || row.parseError ? '#b00020' : '#555' }}>
                       {row.logError ?? row.parseError ?? "Sin detalle de error en el texto"}
@@ -451,6 +510,19 @@ export default function RabbitExtractor() {
                 )}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+      {modalRow && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999 }} onClick={closeModal}>
+          <div style={{ background: '#fff', padding: 16, borderRadius: 8, width: '80%', maxHeight: '80%', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+            <h4>Detalle mensaje — {modalRow.rabbitName}</h4>
+            <div style={{ marginBottom: 8, display: 'flex', gap: 8 }}>
+              <button onClick={() => { navigator.clipboard.writeText(JSON.stringify(modalRow.rabbitPayload, null, 2)); }}>Copiar</button>
+              <button onClick={() => downloadSingleMessage(modalRow)}>Descargar</button>
+              <button onClick={closeModal}>Cerrar</button>
+            </div>
+            <pre style={{ whiteSpace: 'pre-wrap', fontSize: 13 }}>{JSON.stringify(modalRow.rabbitPayload, null, 2)}</pre>
           </div>
         </div>
       )}

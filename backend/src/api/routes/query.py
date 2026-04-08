@@ -2,7 +2,11 @@ from dataclasses import dataclass
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from fastapi.responses import PlainTextResponse
+from fastapi.responses import PlainTextResponse, StreamingResponse
+import io
+import json
+import zipfile
+from fastapi import Query
 
 from services.query_engine import GROUPABLE_FIELDS, apply_filters, grouping_summary, paginate, records, sort_dataframe
 from services.store import store
@@ -162,3 +166,84 @@ def export_csv(
     out = filtered[cols].copy()
     out["timestamp"] = out["timestamp"].dt.strftime("%Y-%m-%dT%H:%M:%SZ")
     return out.to_csv(index=False)
+
+
+@router.get(
+    "/export_zip",
+    responses={404: {"description": "Sesión no encontrada"}},
+)
+def export_zip(
+    session_id: str,
+    filters: Annotated[FilterParams, Depends(get_filter_params)],
+    max_messages: Annotated[int, Query(ge=1, le=10000)] = 5000,
+) -> StreamingResponse:
+    """Genera un ZIP con un archivo de texto por cada mensaje filtrado.
+
+    Cada archivo contiene una cabecera con metadatos y el campo `message` como payload.
+    """
+    df = store.get(session_id)
+    if df is None:
+        raise HTTPException(status_code=404, detail=SESSION_NOT_FOUND)
+
+    filtered = apply_filters(
+        df,
+        text=filters.text,
+        level=filters.level,
+        service=filters.service,
+        host=filters.host,
+        logger=filters.logger,
+        location=filters.location,
+        status_code=filters.status_code,
+        message_text=filters.message_text,
+        logger_text=filters.logger_text,
+        location_text=filters.location_text,
+    )
+
+    # Limit total messages to avoid memoria excesiva
+    total = len(filtered)
+    if total == 0:
+        # devolver zip vacío
+        bio = io.BytesIO()
+        with zipfile.ZipFile(bio, mode="w") as zf:
+            pass
+        bio.seek(0)
+        return StreamingResponse(bio, media_type="application/zip", headers={"Content-Disposition": f"attachment; filename=messages_{session_id}.zip"})
+
+    to_export = filtered.head(max_messages)
+
+    bio = io.BytesIO()
+    with zipfile.ZipFile(bio, mode="w", compression=zipfile.ZIP_DEFLATED) as zf:
+        for idx, (_, row) in enumerate(to_export.iterrows(), start=1):
+            # construir nombre de fichero seguro
+            service = str(row.get("service") or "rabbit").replace(" ", "_")
+            filename = f"message_{idx}_{service}.txt"
+
+            # construir contenido: metadata + message/payload
+            timestamp = ""
+            try:
+                timestamp = row.get("timestamp").strftime("%Y-%m-%dT%H:%M:%SZ") if row.get("timestamp") is not None else ""
+            except Exception:
+                timestamp = str(row.get("timestamp"))
+
+            meta = {
+                "timestamp": timestamp,
+                "service": row.get("service"),
+                "host": row.get("host"),
+                "logger": row.get("logger"),
+                "location": row.get("location"),
+                "method": row.get("method"),
+                "status_code": row.get("status_code"),
+                "exception_type": row.get("exception_type"),
+            }
+
+            # message/payload
+            message = row.get("message") or ""
+
+            parts = ["METADATA:\n", json.dumps(meta, ensure_ascii=False, indent=2), "\n\nMESSAGE:\n", str(message)]
+            content = "".join(parts)
+
+            zf.writestr(filename, content)
+
+    bio.seek(0)
+    disposition = f"attachment; filename=messages_{session_id}.zip"
+    return StreamingResponse(bio, media_type="application/zip", headers={"Content-Disposition": disposition})
