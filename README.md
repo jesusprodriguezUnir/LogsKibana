@@ -87,6 +87,29 @@ docker compose -f infra/docker/docker-compose.yml up --build
 - `GET /api/export` - Exporta CSV filtrado
 - `GET /health` - Estado del backend
 
+## Extractor RabbitMQ (UI)
+
+La pantalla de extraccion RabbitMQ del frontend incluye las siguientes funcionalidades:
+
+- Flujo estable `upload -> search` contra el backend.
+- Paginacion automatica para respetar limites de `page_size` del API.
+- Deteccion de tipos Rabbit por mensaje y filtro por checkboxes.
+- Visualizacion de payload Rabbit estructurado en JSON por fila.
+- Columna `Tipo de error` con clasificacion: `Exception`, `StatusCode`, `Parseo`, `Sin detalle`.
+- Columna `Error` con detalle extraido del log (`Exception caught`, `StatusCode`, etc.).
+- Copia de mensajes filtrados al portapapeles.
+- Descarga de JSON filtrado con `rabbit_name`, `timestamp`, `payload`, `error_type`, `log_error`, `parse_error`.
+
+Notas:
+
+- Si un mensaje requiere parseo limpio y no se puede transformar, se usa fallback estructurado con `rabbit_name`, `timestamp` y `message`.
+- El extractor prioriza mostrar el error funcional del log (no solo errores de parseo).
+
+## Politica de archivos locales
+
+- Todo lo que este dentro de `Docs/` se considera material local de trabajo y no se sube al repositorio.
+- Esta exclusion se controla mediante `.gitignore`.
+
 ## Siguiente fase (cuando lo pases a cloud)
 
 1. Subir repositorio a GitHub.
