@@ -107,8 +107,17 @@ def infer_exception_type(message: str) -> str:
     return "unknown"
 
 
+
 def normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
+    # Renombrar columnas usando los alias definidos
     renamed = df.rename(columns=COLUMN_ALIASES).copy()
+
+    # Permitir que timestamp esté como "@timestamp" o "timestamp"
+    if "timestamp" not in renamed.columns:
+        if "@timestamp" in df.columns:
+            renamed["timestamp"] = df["@timestamp"]
+    if "message" not in renamed.columns and "message" in df.columns:
+        renamed["message"] = df["message"]
 
     missing = [col for col in REQUIRED_COLUMNS if col not in renamed.columns]
     if missing:

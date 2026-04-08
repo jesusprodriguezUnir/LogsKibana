@@ -51,7 +51,11 @@ const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
 const DEFAULT_GROUP_FIELDS = ["level", "service", "logger", "location"];
 const SORT_FIELDS = ["timestamp", "level", "service", "host", "logger", "location", "method", "status_code"];
 
+
+import RabbitExtractor from "./components/RabbitExtractor";
+
 export function App() {
+  const [showRabbitExtractor, setShowRabbitExtractor] = useState(false);
   const [sessionId, setSessionId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -180,11 +184,21 @@ export function App() {
   const topStatusCodes = Object.entries(groups?.groups.status_code ?? {}).slice(0, 5);
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
+  if (showRabbitExtractor) {
+    return (
+      <main className="shell">
+        <button onClick={() => setShowRabbitExtractor(false)} style={{margin: 16}}>Volver</button>
+        <RabbitExtractor />
+      </main>
+    );
+  }
+
   return (
     <main className="shell">
       <header>
         <h1>Kibana Logs Explorer</h1>
         <p>Sube un CSV y agrupa de inmediato por los campos detectados del log, incluyendo logger y location.</p>
+        <button onClick={() => setShowRabbitExtractor(true)} style={{marginTop: 16}}>Ir a extracción de mensajes RabbitMQ</button>
       </header>
 
       <section className="card">
