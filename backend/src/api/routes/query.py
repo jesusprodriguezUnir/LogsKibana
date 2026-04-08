@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import Annotated
+from fastapi import Request
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse, StreamingResponse
@@ -7,6 +8,7 @@ import io
 import json
 import zipfile
 from fastapi import Query
+import pandas as pd
 
 from services.query_engine import GROUPABLE_FIELDS, apply_filters, grouping_summary, paginate, records, sort_dataframe
 from services.store import store
@@ -77,6 +79,7 @@ def search(
     session_id: str,
     filters: Annotated[FilterParams, Depends(get_filter_params)],
     table: Annotated[SearchTableParams, Depends(get_search_table_params)],
+    request: Request,
 ) -> dict[str, object]:
     df = store.get(session_id)
     if df is None:
@@ -95,6 +98,51 @@ def search(
         logger_text=filters.logger_text,
         location_text=filters.location_text,
     )
+
+    # Aplicar filtros por payload si vienen como query params `payload.<field>`
+    payload_params = {k[len("payload."):]: v for k, v in request.query_params.items() if k.startswith("payload.")}
+    if payload_params:
+        for field, value in payload_params.items():
+            # soportar rangos: field_from / field_to
+            if field.endswith("_from") or field.endswith("_to"):
+                base, suffix = field.rsplit("_", 1)
+                col = f"payload_{base}"
+                if col not in filtered.columns:
+                    continue
+                if pd.api.types.is_datetime64_any_dtype(filtered[col]):
+                    try:
+                        dt = pd.to_datetime(value, utc=True, errors="coerce")
+                    except Exception:
+                        dt = pd.to_datetime(value, errors="coerce")
+                    if suffix == "from":
+                        filtered = filtered[filtered[col] >= dt]
+                    else:
+                        filtered = filtered[filtered[col] <= dt]
+                else:
+                    # aplicar comparador numérico si posible
+                    try:
+                        num = float(value)
+                        if suffix == "from":
+                            filtered = filtered[pd.to_numeric(filtered[col], errors="coerce") >= num]
+                        else:
+                            filtered = filtered[pd.to_numeric(filtered[col], errors="coerce") <= num]
+                    except Exception:
+                        # no soportado
+                        continue
+            else:
+                col = f"payload_{field}"
+                if col not in filtered.columns:
+                    continue
+                if pd.api.types.is_string_dtype(filtered[col]) or filtered[col].dtype == object:
+                    filtered = filtered[filtered[col].astype(str).str.contains(value, case=False, na=False)]
+                else:
+                    # intento de igualdad numérica
+                    try:
+                        num = float(value)
+                        filtered = filtered[pd.to_numeric(filtered[col], errors="coerce") == num]
+                    except Exception:
+                        filtered = filtered[filtered[col].astype(str).str.contains(value, case=False, na=False)]
+
     sorted_df = sort_dataframe(filtered, sort_by=table.sort_by, sort_order=table.sort_order)
     page_df, total = paginate(sorted_df, page=table.page, page_size=table.page_size)
 

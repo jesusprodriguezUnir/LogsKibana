@@ -3,6 +3,8 @@ import re
 from urllib.parse import urlparse
 
 import pandas as pd
+from datetime import datetime
+from services.payload_parsers import parse_acta_archivada
 
 REQUIRED_COLUMNS = ["timestamp", "message"]
 COLUMN_ALIASES = {
@@ -152,6 +154,32 @@ def normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
     renamed = renamed.dropna(subset=["timestamp"])
     renamed["date"] = renamed["timestamp"].dt.strftime("%Y-%m-%d")
+    # Extraer campos del payload para mensajes conocidos (ej. ActaArchivada)
+    def _extract_payload_fields(row: pd.Series) -> pd.Series:
+        msg = str(row.get("message", ""))
+        if "ActaArchivada" in msg:
+            parsed = parse_acta_archivada(msg)
+            if parsed:
+                # Campos esperados: IdActa, Fecha, IdClase, TipoEvaluacion, IdAlumnoIntegracion, OrigenActa
+                row["payload_IdActa"] = int(parsed.get("IdActa") or parsed.get("idActa") or 0) if parsed.get("IdActa") or parsed.get("idActa") else None
+                fecha_val = parsed.get("Fecha") or parsed.get("fecha")
+                if fecha_val:
+                    try:
+                        # Intentar parsear en varios formatos
+                        row["payload_Fecha"] = pd.to_datetime(fecha_val, errors="coerce", utc=True)
+                    except Exception:
+                        row["payload_Fecha"] = pd.to_datetime(str(fecha_val), errors="coerce", utc=True)
+                else:
+                    row["payload_Fecha"] = None
+
+                row["payload_IdClase"] = int(parsed.get("IdClase") or parsed.get("idClase") or 0) if parsed.get("IdClase") or parsed.get("idClase") else None
+                row["payload_TipoEvaluacion"] = parsed.get("TipoEvaluacion") or parsed.get("tipoEvaluacion")
+                row["payload_IdAlumnoIntegracion"] = parsed.get("IdAlumnoIntegracion") or parsed.get("idAlumnoIntegracion")
+                row["payload_OrigenActa"] = parsed.get("OrigenActa") or parsed.get("origenActa")
+        return row
+
+    renamed = renamed.apply(_extract_payload_fields, axis=1)
+
     return renamed
 
 

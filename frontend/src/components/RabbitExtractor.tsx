@@ -207,6 +207,14 @@ export default function RabbitExtractor() {
   const [statusMessage, setStatusMessage] = useState<string>("");
   const [selectedRabbitNames, setSelectedRabbitNames] = useState<string[]>([...RABBIT_NAMES]);
   const [modalRow, setModalRow] = useState<RabbitRow | null>(null);
+  // Payload filters for ActaArchivada
+  const [payload_IdActa, setPayload_IdActa] = useState<string>("");
+  const [payload_Fecha_from, setPayload_Fecha_from] = useState<string>("");
+  const [payload_Fecha_to, setPayload_Fecha_to] = useState<string>("");
+  const [payload_IdClase, setPayload_IdClase] = useState<string>("");
+  const [payload_TipoEvaluacion, setPayload_TipoEvaluacion] = useState<string>("");
+  const [payload_IdAlumnoIntegracion, setPayload_IdAlumnoIntegracion] = useState<string>("");
+  const [payload_OrigenActa, setPayload_OrigenActa] = useState<string>("");
 
   const rabbitRows = useMemo<RabbitRow[]>(() => {
     return rows
@@ -303,6 +311,59 @@ export default function RabbitExtractor() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const applyPayloadFilters = async () => {
+    if (!sessionId) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const params = new URLSearchParams({
+        session_id: sessionId,
+        page: "1",
+        page_size: String(SEARCH_PAGE_SIZE),
+        sort_by: "timestamp",
+        sort_order: "desc",
+      });
+
+      if (payload_IdActa) params.set("payload.IdActa", payload_IdActa);
+      if (payload_Fecha_from) params.set("payload.Fecha_from", payload_Fecha_from);
+      if (payload_Fecha_to) params.set("payload.Fecha_to", payload_Fecha_to);
+      if (payload_IdClase) params.set("payload.IdClase", payload_IdClase);
+      if (payload_TipoEvaluacion) params.set("payload.TipoEvaluacion", payload_TipoEvaluacion);
+      if (payload_IdAlumnoIntegracion) params.set("payload.IdAlumnoIntegracion", payload_IdAlumnoIntegracion);
+      if (payload_OrigenActa) params.set("payload.OrigenActa", payload_OrigenActa);
+
+      const firstPage = await requestJson<SearchResponse>(`/search?${params.toString()}`);
+      const collectedRows = [...(firstPage.items || [])];
+      const total = firstPage.total ?? collectedRows.length;
+      const pageSize = firstPage.page_size ?? SEARCH_PAGE_SIZE;
+      const totalPages = Math.max(1, Math.ceil(total / pageSize));
+
+      for (let page = 2; page <= totalPages; page += 1) {
+        params.set("page", String(page));
+        const nextPage = await requestJson<SearchResponse>(`/search?${params.toString()}`);
+        if (nextPage.items?.length) {
+          collectedRows.push(...nextPage.items);
+        }
+      }
+
+      setRows(collectedRows);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error aplicando filtros");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearPayloadFilters = () => {
+    setPayload_IdActa("");
+    setPayload_Fecha_from("");
+    setPayload_Fecha_to("");
+    setPayload_IdClase("");
+    setPayload_TipoEvaluacion("");
+    setPayload_IdAlumnoIntegracion("");
+    setPayload_OrigenActa("");
   };
 
   const toggleRabbitName = (rabbitName: string) => {
@@ -441,6 +502,46 @@ export default function RabbitExtractor() {
                   <span>{rabbitName}</span>
                 </label>
               ))}
+            </div>
+          )}
+          {/* Payload filters for ActaArchivada */}
+          {detectedRabbitNames.includes("ActaArchivada") && (
+            <div style={{ marginTop: 12, padding: 12, border: '1px dashed #ddd', borderRadius: 6 }}>
+              <h4 style={{ marginTop: 0 }}>Filtros ActaArchivada</h4>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <label>
+                  IdActa:
+                  <input type="text" value={payload_IdActa} onChange={(e) => setPayload_IdActa(e.target.value)} />
+                </label>
+                <label>
+                  IdClase:
+                  <input type="text" value={payload_IdClase} onChange={(e) => setPayload_IdClase(e.target.value)} />
+                </label>
+                <label>
+                  TipoEvaluacion:
+                  <input type="text" value={payload_TipoEvaluacion} onChange={(e) => setPayload_TipoEvaluacion(e.target.value)} />
+                </label>
+                <label>
+                  IdAlumnoIntegracion:
+                  <input type="text" value={payload_IdAlumnoIntegracion} onChange={(e) => setPayload_IdAlumnoIntegracion(e.target.value)} />
+                </label>
+                <label>
+                  OrigenActa:
+                  <input type="text" value={payload_OrigenActa} onChange={(e) => setPayload_OrigenActa(e.target.value)} />
+                </label>
+                <div>
+                  Fecha desde:
+                  <input type="date" value={payload_Fecha_from} onChange={(e) => setPayload_Fecha_from(e.target.value)} />
+                </div>
+                <div>
+                  Fecha hasta:
+                  <input type="date" value={payload_Fecha_to} onChange={(e) => setPayload_Fecha_to(e.target.value)} />
+                </div>
+              </div>
+              <div style={{ marginTop: 8, display: 'flex', gap: 8 }}>
+                <button onClick={applyPayloadFilters} disabled={!sessionId}>Aplicar filtros ActaArchivada</button>
+                <button onClick={clearPayloadFilters}>Limpiar filtros</button>
+              </div>
             </div>
           )}
           <button
