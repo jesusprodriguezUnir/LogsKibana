@@ -150,11 +150,12 @@ export default function RabbitExtractor() {
   const [error,               setError]               = useState<string | null>(null);
   const [copied,              setCopied]              = useState(false);
   const [statusMessage,       setStatusMessage]       = useState("");
-  const [selectedRabbitNames, setSelectedRabbitNames] = useState<string[] | null>(null);
+  const [selectedRabbitNames, setSelectedRabbitNames] = useState<string[]>([]);
   const [modalRow,            setModalRow]            = useState<RabbitRow | null>(null);
   const [payloadFilters,      setPayloadFilters]      = useState<Record<string, string>>({});
   const [timestampFrom,       setTimestampFrom]       = useState("");
   const [timestampTo,         setTimestampTo]         = useState("");
+  const [messageText,         setMessageText]         = useState("");
 
   // ── Derived ─────────────────────────────────────────────────────────────────
 
@@ -174,7 +175,6 @@ export default function RabbitExtractor() {
   [rabbitRows]);
 
   const filteredRows = useMemo(() => {
-    if (selectedRabbitNames === null) return rabbitRows;
     if (selectedRabbitNames.length === 0) return [];
     const sel = new Set(selectedRabbitNames);
     return rabbitRows.filter((r) => sel.has(r.rabbitName));
@@ -217,6 +217,7 @@ export default function RabbitExtractor() {
       const extra = new URLSearchParams();
       if (timestampFrom) extra.set("timestamp_from", timestampFrom);
       if (timestampTo) extra.set("timestamp_to", timestampTo);
+      if (messageText) extra.set("message_text", messageText);
       Object.entries(payloadFilters).forEach(([key, val]) => {
         if (val) extra.set(`payload.${key}`, val);
       });
@@ -225,6 +226,25 @@ export default function RabbitExtractor() {
       setRows(collected);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Error aplicando filtros");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const clearFiltersAndRefetch = async () => {
+    if (!sessionId) return;
+    setPayloadFilters({});
+    setTimestampFrom("");
+    setTimestampTo("");
+    setMessageText("");
+    
+    setLoading(true);
+    setError(null);
+    try {
+      const collected = await fetchAllRows(sessionId);
+      setRows(collected);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Error recargando filtros");
     } finally {
       setLoading(false);
     }
@@ -252,7 +272,7 @@ export default function RabbitExtractor() {
     if (!sessionId || filteredRows.length === 0) return;
     try {
       const params = new URLSearchParams({ session_id: sessionId });
-      if (selectedRabbitNames !== null && selectedRabbitNames.length > 0) params.set("message_text", selectedRabbitNames.join("|"));
+      if (selectedRabbitNames.length > 0) params.set("message_text", selectedRabbitNames.join("|"));
       const resp = await fetch(buildApiUrl(`/export_zip?${params}`));
       if (!resp.ok) throw new Error(`Error en export ZIP: ${resp.statusText}`);
       const blob = await resp.blob();
@@ -336,12 +356,12 @@ export default function RabbitExtractor() {
             </p>
             <div style={{ display: "flex", gap: 8 }}>
               <button className="btn btn-secondary btn-sm" disabled={detectedRabbitNames.length === 0}
-                onClick={() => setSelectedRabbitNames(null)}>
+                onClick={() => setSelectedRabbitNames(detectedRabbitNames)}>
                 Seleccionar todos
               </button>
-              <button className="btn btn-ghost btn-sm" disabled={selectedRabbitNames !== null && selectedRabbitNames.length === 0}
+              <button className="btn btn-ghost btn-sm" disabled={selectedRabbitNames.length === 0}
                 onClick={() => setSelectedRabbitNames([])}>
-                Limpiar
+                Desmarcar todos
               </button>
             </div>
           </div>
@@ -352,14 +372,12 @@ export default function RabbitExtractor() {
                 <label key={name} className="rabbit-name-item">
                   <input
                     type="checkbox"
-                    checked={selectedRabbitNames === null ? true : selectedRabbitNames.includes(name)}
+                    checked={selectedRabbitNames.includes(name)}
                     onChange={() => {
-                      let cur = selectedRabbitNames === null ? detectedRabbitNames : selectedRabbitNames;
-                      if (cur.includes(name)) {
-                        setSelectedRabbitNames(cur.filter((x) => x !== name));
-                      } else {
-                        setSelectedRabbitNames([...cur, name]);
-                      }
+                      const cur = selectedRabbitNames;
+                      const next = cur.includes(name) ? cur.filter((x) => x !== name) : [...cur, name];
+                      setSelectedRabbitNames(next);
+                      if (next.length !== 1) setPayloadFilters({});
                     }}
                   />
                   <span>{name}</span>
@@ -374,6 +392,11 @@ export default function RabbitExtractor() {
                 <span>📋</span> Filtros globales
               </div>
               <div className="payload-filters-grid">
+                <div className="field-group">
+                  <label htmlFor="pf-message">Texto contenido (global)</label>
+                  <input id="pf-message" type="text" placeholder="Cualquier texto..." value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)} />
+                </div>
                 <div className="field-group">
                   <label htmlFor="pf-fecha-from">Fecha desde (global)</label>
                   <input id="pf-fecha-from" type="date" value={timestampFrom}
@@ -417,12 +440,8 @@ export default function RabbitExtractor() {
                 <button className="btn btn-primary btn-sm" onClick={() => void applyPayloadFilters()} disabled={!sessionId || loading}>
                   Aplicar filtros
                 </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => {
-                  setPayloadFilters({});
-                  setTimestampFrom("");
-                  setTimestampTo("");
-                }}>
-                  Limpiar filtros
+                <button className="btn btn-ghost btn-sm" onClick={() => void clearFiltersAndRefetch()}>
+                  Limpiar filtros y recargar datos
                 </button>
               </div>
             </div>
