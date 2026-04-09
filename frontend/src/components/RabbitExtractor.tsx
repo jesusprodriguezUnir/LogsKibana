@@ -175,7 +175,7 @@ export default function RabbitExtractor() {
   [rabbitRows]);
 
   const filteredRows = useMemo(() => {
-    if (selectedRabbitNames.length === 0) return [];
+    if (selectedRabbitNames.length === 0) return rabbitRows;
     const sel = new Set(selectedRabbitNames);
     return rabbitRows.filter((r) => sel.has(r.rabbitName));
   }, [rabbitRows, selectedRabbitNames]);
@@ -395,17 +395,20 @@ export default function RabbitExtractor() {
                 <div className="field-group">
                   <label htmlFor="pf-message">Texto contenido (global)</label>
                   <input id="pf-message" type="text" placeholder="Cualquier texto..." value={messageText}
-                    onChange={(e) => setMessageText(e.target.value)} />
+                    onChange={(e) => setMessageText(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") void applyPayloadFilters(); }} />
                 </div>
                 <div className="field-group">
                   <label htmlFor="pf-fecha-from">Fecha desde (global)</label>
                   <input id="pf-fecha-from" type="date" value={timestampFrom}
-                    onChange={(e) => setTimestampFrom(e.target.value)} />
+                    onChange={(e) => setTimestampFrom(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") void applyPayloadFilters(); }} />
                 </div>
                 <div className="field-group">
                   <label htmlFor="pf-fecha-to">Fecha hasta (global)</label>
                   <input id="pf-fecha-to" type="date" value={timestampTo}
-                    onChange={(e) => setTimestampTo(e.target.value)} />
+                    onChange={(e) => setTimestampTo(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === "Enter") void applyPayloadFilters(); }} />
                 </div>
               </div>
 
@@ -429,6 +432,7 @@ export default function RabbitExtractor() {
                               : e.target.value;
                             setPayloadFilters((f) => ({ ...f, [def.key]: val }));
                           }}
+                          onKeyDown={(e) => { if (e.key === "Enter") void applyPayloadFilters(); }}
                         />
                       </div>
                     ))}
@@ -514,6 +518,7 @@ export default function RabbitExtractor() {
                     <td style={{ whiteSpace: "nowrap" }}>
                       <button className="btn btn-ghost btn-xs" onClick={() => setModalRow(row)} title="Ver detalle">🔍</button>
                       <button className="btn btn-ghost btn-xs" onClick={() => downloadSingleMessage(row)} title="Descargar">⬇</button>
+                      <button className="btn btn-ghost btn-xs" onClick={() => void publishToLocalRabbit(row)} title="Publicar a Rabbit local">🐇</button>
                     </td>
                   </tr>
                 ))}
@@ -538,6 +543,7 @@ export default function RabbitExtractor() {
                 <LevelBadge level={modalRow.level} />
               </span>
               <div style={{ display: "flex", gap: 8 }}>
+                <button className="btn btn-teal btn-sm" onClick={() => void publishToLocalRabbit(modalRow)}>🐇 Publicar a Rabbit</button>
                 <button className="btn btn-secondary btn-sm"
                   onClick={() => void navigator.clipboard.writeText(JSON.stringify(modalRow.rabbitPayload, null, 2))}>
                   📋 Copiar

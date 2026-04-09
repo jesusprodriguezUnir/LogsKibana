@@ -454,7 +454,7 @@ function SummaryMiniPanel({ title, entries }: { title: string; entries: [string,
         {entries.length === 0 && <li style={{ color: "var(--ink-faint)", fontSize: 12 }}>—</li>}
         {entries.map(([k, v]) => (
           <li key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, gap: 6 }}>
-            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--ink-muted)" }}>{k}</span>
+            <span title={k} style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--ink-muted)" }}>{k}</span>
             <strong style={{ flexShrink: 0, color: "var(--ink)" }}>{v}</strong>
           </li>
         ))}

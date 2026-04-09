@@ -3,6 +3,7 @@ pyproject.toml
 src/api/__init__.py
 src/api/main.py
 src/api/routes/__init__.py
+src/api/routes/publish.py
 src/api/routes/query.py
 src/api/routes/upload.py
 src/kibana_logs_backend.egg-info/PKG-INFO
