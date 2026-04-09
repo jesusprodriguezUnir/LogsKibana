@@ -3,6 +3,10 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+*.egg-info/
+
+# Session store (ephemeral runtime data)
+backend/.session_store/
 
 # Node
 node_modules/
