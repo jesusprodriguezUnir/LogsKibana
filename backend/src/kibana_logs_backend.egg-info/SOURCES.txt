@@ -11,5 +11,6 @@ src/kibana_logs_backend.egg-info/dependency_links.txt
 src/kibana_logs_backend.egg-info/requires.txt
 src/kibana_logs_backend.egg-info/top_level.txt
 src/services/csv_processor.py
+src/services/payload_parsers.py
 src/services/query_engine.py
 src/services/store.py

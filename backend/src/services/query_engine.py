@@ -40,6 +40,8 @@ def apply_filters(
     message_text: str | None = None,
     logger_text: str | None = None,
     location_text: str | None = None,
+    timestamp_from: str | None = None,
+    timestamp_to: str | None = None,
 ) -> pd.DataFrame:
     result = df
 
@@ -64,6 +66,14 @@ def apply_filters(
         result = result[result["logger"].str.contains(logger_text, case=False, na=False)]
     if location_text:
         result = result[result["location"].str.contains(location_text, case=False, na=False)]
+    if timestamp_from:
+        dt = pd.to_datetime(timestamp_from, utc=True, errors="coerce")
+        if pd.notna(dt):
+            result = result[result["timestamp"] >= dt]
+    if timestamp_to:
+        dt = pd.to_datetime(timestamp_to, utc=True, errors="coerce")
+        if pd.notna(dt):
+            result = result[result["timestamp"] <= dt]
 
     return result
 

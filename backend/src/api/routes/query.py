@@ -30,6 +30,8 @@ class FilterParams:
     message_text: str | None = None
     logger_text: str | None = None
     location_text: str | None = None
+    timestamp_from: str | None = None
+    timestamp_to: str | None = None
 
 
 @dataclass
@@ -51,11 +53,14 @@ def get_filter_params(
     message_text: Annotated[str | None, Query()] = None,
     logger_text: Annotated[str | None, Query()] = None,
     location_text: Annotated[str | None, Query()] = None,
+    timestamp_from: Annotated[str | None, Query()] = None,
+    timestamp_to: Annotated[str | None, Query()] = None,
 ) -> FilterParams:
     return FilterParams(
         text=text, level=level, service=service, host=host,
         logger=logger, location=location, status_code=status_code,
         message_text=message_text, logger_text=logger_text, location_text=location_text,
+        timestamp_from=timestamp_from, timestamp_to=timestamp_to,
     )
 
 
@@ -84,6 +89,8 @@ def _resolve_and_filter(df: pd.DataFrame, filters: FilterParams, request: Reques
         message_text=filters.message_text,
         logger_text=filters.logger_text,
         location_text=filters.location_text,
+        timestamp_from=filters.timestamp_from,
+        timestamp_to=filters.timestamp_to,
     )
 
     if request is None:

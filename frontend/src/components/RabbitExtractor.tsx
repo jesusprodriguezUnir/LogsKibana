@@ -4,6 +4,7 @@ import type { LogRow, SearchResponse } from "../types";
 import { LevelBadge } from "./LevelBadge";
 import { MessageCell } from "./MessageCell";
 import { UploadDropzone } from "./UploadDropzone";
+import { RABBIT_SCHEMAS } from "../config/rabbitFields";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -15,20 +16,7 @@ interface RabbitRow extends LogRow {
   errorType: "Exception" | "StatusCode" | "Parseo" | "Sin detalle";
 }
 
-interface PayloadFilters {
-  IdActa: string;
-  Fecha_from: string;
-  Fecha_to: string;
-  IdClase: string;
-  TipoEvaluacion: string;
-  IdAlumnoIntegracion: string;
-  OrigenActa: string;
-}
 
-const EMPTY_PAYLOAD_FILTERS: PayloadFilters = {
-  IdActa: "", Fecha_from: "", Fecha_to: "",
-  IdClase: "", TipoEvaluacion: "", IdAlumnoIntegracion: "", OrigenActa: "",
-};
 
 const RABBIT_NAMES = [
   "MatriculaRealizada", "MatriculaAnulada", "MatriculaRecuperada",
@@ -162,9 +150,11 @@ export default function RabbitExtractor() {
   const [error,               setError]               = useState<string | null>(null);
   const [copied,              setCopied]              = useState(false);
   const [statusMessage,       setStatusMessage]       = useState("");
-  const [selectedRabbitNames, setSelectedRabbitNames] = useState<string[]>([...RABBIT_NAMES]);
+  const [selectedRabbitNames, setSelectedRabbitNames] = useState<string[] | null>(null);
   const [modalRow,            setModalRow]            = useState<RabbitRow | null>(null);
-  const [payloadFilters,      setPayloadFilters]      = useState<PayloadFilters>(EMPTY_PAYLOAD_FILTERS);
+  const [payloadFilters,      setPayloadFilters]      = useState<Record<string, string>>({});
+  const [timestampFrom,       setTimestampFrom]       = useState("");
+  const [timestampTo,         setTimestampTo]         = useState("");
 
   // ── Derived ─────────────────────────────────────────────────────────────────
 
@@ -184,6 +174,7 @@ export default function RabbitExtractor() {
   [rabbitRows]);
 
   const filteredRows = useMemo(() => {
+    if (selectedRabbitNames === null) return rabbitRows;
     if (selectedRabbitNames.length === 0) return [];
     const sel = new Set(selectedRabbitNames);
     return rabbitRows.filter((r) => sel.has(r.rabbitName));
@@ -224,13 +215,12 @@ export default function RabbitExtractor() {
     setError(null);
     try {
       const extra = new URLSearchParams();
-      if (payloadFilters.IdActa)             extra.set("payload.IdActa",             payloadFilters.IdActa);
-      if (payloadFilters.Fecha_from)         extra.set("payload.Fecha_from",         payloadFilters.Fecha_from);
-      if (payloadFilters.Fecha_to)           extra.set("payload.Fecha_to",           payloadFilters.Fecha_to);
-      if (payloadFilters.IdClase)            extra.set("payload.IdClase",            payloadFilters.IdClase);
-      if (payloadFilters.TipoEvaluacion)     extra.set("payload.TipoEvaluacion",     payloadFilters.TipoEvaluacion);
-      if (payloadFilters.IdAlumnoIntegracion)extra.set("payload.IdAlumnoIntegracion",payloadFilters.IdAlumnoIntegracion);
-      if (payloadFilters.OrigenActa)         extra.set("payload.OrigenActa",         payloadFilters.OrigenActa);
+      if (timestampFrom) extra.set("timestamp_from", timestampFrom);
+      if (timestampTo) extra.set("timestamp_to", timestampTo);
+      Object.entries(payloadFilters).forEach(([key, val]) => {
+        if (val) extra.set(`payload.${key}`, val);
+      });
+      
       const collected = await fetchAllRows(sessionId, extra);
       setRows(collected);
     } catch (err: unknown) {
@@ -240,8 +230,7 @@ export default function RabbitExtractor() {
     }
   };
 
-  const setPF = (key: keyof PayloadFilters, value: string) =>
-    setPayloadFilters((f) => ({ ...f, [key]: value }));
+
 
   const downloadFilteredJson = () => {
     if (filteredRows.length === 0) return;
@@ -263,7 +252,7 @@ export default function RabbitExtractor() {
     if (!sessionId || filteredRows.length === 0) return;
     try {
       const params = new URLSearchParams({ session_id: sessionId });
-      if (selectedRabbitNames.length > 0) params.set("message_text", selectedRabbitNames.join("|"));
+      if (selectedRabbitNames !== null && selectedRabbitNames.length > 0) params.set("message_text", selectedRabbitNames.join("|"));
       const resp = await fetch(buildApiUrl(`/export_zip?${params}`));
       if (!resp.ok) throw new Error(`Error en export ZIP: ${resp.statusText}`);
       const blob = await resp.blob();
@@ -347,10 +336,10 @@ export default function RabbitExtractor() {
             </p>
             <div style={{ display: "flex", gap: 8 }}>
               <button className="btn btn-secondary btn-sm" disabled={detectedRabbitNames.length === 0}
-                onClick={() => setSelectedRabbitNames(detectedRabbitNames)}>
+                onClick={() => setSelectedRabbitNames(null)}>
                 Seleccionar todos
               </button>
-              <button className="btn btn-ghost btn-sm" disabled={selectedRabbitNames.length === 0}
+              <button className="btn btn-ghost btn-sm" disabled={selectedRabbitNames !== null && selectedRabbitNames.length === 0}
                 onClick={() => setSelectedRabbitNames([])}>
                 Limpiar
               </button>
@@ -363,12 +352,15 @@ export default function RabbitExtractor() {
                 <label key={name} className="rabbit-name-item">
                   <input
                     type="checkbox"
-                    checked={selectedRabbitNames.includes(name)}
-                    onChange={() =>
-                      setSelectedRabbitNames((cur) =>
-                        cur.includes(name) ? cur.filter((x) => x !== name) : [...cur, name]
-                      )
-                    }
+                    checked={selectedRabbitNames === null ? true : selectedRabbitNames.includes(name)}
+                    onChange={() => {
+                      let cur = selectedRabbitNames === null ? detectedRabbitNames : selectedRabbitNames;
+                      if (cur.includes(name)) {
+                        setSelectedRabbitNames(cur.filter((x) => x !== name));
+                      } else {
+                        setSelectedRabbitNames([...cur, name]);
+                      }
+                    }}
                   />
                   <span>{name}</span>
                 </label>
@@ -376,40 +368,60 @@ export default function RabbitExtractor() {
             </div>
           )}
 
-          {/* ActaArchivada payload filters */}
-          {detectedRabbitNames.includes("ActaArchivada") && (
+          {detectedRabbitNames.length > 0 && (
             <div className="payload-filters">
               <div className="payload-filters__title">
-                <span>📋</span> Filtros ActaArchivada
+                <span>📋</span> Filtros globales
               </div>
               <div className="payload-filters-grid">
-                {(["IdActa", "IdClase", "TipoEvaluacion", "IdAlumnoIntegracion", "OrigenActa"] as Array<keyof PayloadFilters>).map((key) => (
-                  <div className="field-group" key={key}>
-                    <label htmlFor={`pf-${key}`}>{key}</label>
-                    <input
-                      id={`pf-${key}`}
-                      type="text"
-                      value={payloadFilters[key]}
-                      onChange={(e: ChangeEvent<HTMLInputElement>) => setPF(key, e.target.value)}
-                    />
-                  </div>
-                ))}
                 <div className="field-group">
-                  <label htmlFor="pf-fecha-from">Fecha desde</label>
-                  <input id="pf-fecha-from" type="date" value={payloadFilters.Fecha_from}
-                    onChange={(e) => setPF("Fecha_from", e.target.value)} />
+                  <label htmlFor="pf-fecha-from">Fecha desde (global)</label>
+                  <input id="pf-fecha-from" type="date" value={timestampFrom}
+                    onChange={(e) => setTimestampFrom(e.target.value)} />
                 </div>
                 <div className="field-group">
-                  <label htmlFor="pf-fecha-to">Fecha hasta</label>
-                  <input id="pf-fecha-to" type="date" value={payloadFilters.Fecha_to}
-                    onChange={(e) => setPF("Fecha_to", e.target.value)} />
+                  <label htmlFor="pf-fecha-to">Fecha hasta (global)</label>
+                  <input id="pf-fecha-to" type="date" value={timestampTo}
+                    onChange={(e) => setTimestampTo(e.target.value)} />
                 </div>
               </div>
-              <div className="action-bar">
+
+              {selectedRabbitNames?.length === 1 && RABBIT_SCHEMAS[selectedRabbitNames[0]] && (
+                <>
+                  <div className="payload-filters__title" style={{ marginTop: 16 }}>
+                    <span>🏷</span> Filtros específicos de {selectedRabbitNames[0]}
+                  </div>
+                  <div className="payload-filters-grid">
+                    {RABBIT_SCHEMAS[selectedRabbitNames[0]].map((def) => (
+                      <div className="field-group" key={def.key}>
+                        <label htmlFor={`pf-${def.key}`}>{def.label}</label>
+                        <input
+                          id={`pf-${def.key}`}
+                          type={def.type === "number" ? "number" : def.type === "boolean" ? "checkbox" : "text"}
+                          checked={def.type === "boolean" ? payloadFilters[def.key] === "1" : undefined}
+                          value={def.type === "boolean" ? undefined : payloadFilters[def.key] || ""}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                            const val = def.type === "boolean" 
+                              ? (e.target.checked ? "1" : "") 
+                              : e.target.value;
+                            setPayloadFilters((f) => ({ ...f, [def.key]: val }));
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              <div className="action-bar" style={{ marginTop: 16 }}>
                 <button className="btn btn-primary btn-sm" onClick={() => void applyPayloadFilters()} disabled={!sessionId || loading}>
-                  Aplicar filtros ActaArchivada
+                  Aplicar filtros
                 </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => setPayloadFilters(EMPTY_PAYLOAD_FILTERS)}>
+                <button className="btn btn-ghost btn-sm" onClick={() => {
+                  setPayloadFilters({});
+                  setTimestampFrom("");
+                  setTimestampTo("");
+                }}>
                   Limpiar filtros
                 </button>
               </div>

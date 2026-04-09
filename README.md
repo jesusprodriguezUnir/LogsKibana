@@ -110,12 +110,36 @@ Notas:
 - Todo lo que este dentro de `Docs/` se considera material local de trabajo y no se sube al repositorio.
 - Esta exclusion se controla mediante `.gitignore`.
 
-## Siguiente fase (cuando lo pases a cloud)
+## Despliegue en la Nube ☁️ (Render & Vercel)
 
-1. Subir repositorio a GitHub.
-2. Publicar frontend en Vercel.
-3. Publicar backend en Render/Railway/Fly.
-4. Configurar `VITE_API_URL` apuntando al backend publicado.
+El proyecto está preparado para funcionar en la nube de forma nativa. 
+
+### 1. Desplegar el Backend (Render)
+
+1. Sube tu código (haz un `git push`) a tu repositorio en GitHub.
+2. Crea una cuenta en [Render.com](https://render.com/) y haz clic en **New +** -> **Web Service**.
+3. Conecta tu repositorio de GitHub correspondiente.
+4. Completa la configuración del servicio de esta manera:
+   - **Name**: `logs-kibana-api` (o el nombre que desees).
+   - **Root Directory**: `backend` (¡Muy importante!).
+   - **Runtime**: `Docker` (Render lo detectará por el Dockerfile incluido).
+   - **Instance Type**: `Free`.
+5. Haz clic en **Deploy Web Service** y espera a que instale todas las dependencias. 
+   - _Render te devolverá una URL cuando termine, ej. `https://xxx.onrender.com`._
+
+> **Nota sobre Render Free:** El disco es efímero. Cada vez que haya inactividad y Render ponga el servidor en hibernación, las sesiones CSV cargadas temporalmente se borrarán del servidor. Podrás solucionar la caducidad, repitiendo la subida del CSV en el UI.
+
+### 2. Desplegar el Frontend (Vercel)
+
+1. Entra a [Vercel.com](https://vercel.com/) y haz clic en **Add New** -> **Project**.
+2. Conecta también este mismo repositorio.
+3. En la configuración del proyecto en Vercel, marca:
+   - **Root Directory**: `frontend`.
+   - **Framework Preset**: `Vite`.
+4. Extiende el desplegable de **Environment Variables** y añade lo siguiente:
+   - Nombre: `VITE_API_URL`
+   - Valor: `https://TU_ENLACE_PROVISTO_POR_RENDER.com/api` *(Ojo: asegúrate de meter /api al final).*
+5. Dale a **Deploy** e instantáneamente tendrás todo a tu alcance.
 
 ## Ideas siguientes
 

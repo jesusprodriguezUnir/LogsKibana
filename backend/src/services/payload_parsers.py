@@ -28,8 +28,8 @@ def _decode_escaped_message(s: str) -> str:
     )
 
 
-def parse_acta_archivada(text: str) -> Dict[str, Any] | None:
-    """Intentar extraer el JSON del mensaje ActaArchivada y devolver dict con campos.
+def extract_json_payload(text: str) -> Dict[str, Any] | None:
+    """Intentar extraer el JSON de un mensaje Rabbit y devolver un dict con campos.
 
     Devuelve None si no se encuentra JSON parseable.
     """
