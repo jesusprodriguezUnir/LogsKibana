@@ -75,9 +75,13 @@ npm run test
 
 ## Docker local
 
+El entorno Docker incluye tanto el backend de la aplicación como una instancia local de **RabbitMQ** provista con las colas preconfiguradas para desarrollo.
+
 ```bash
 docker compose -f infra/docker/docker-compose.yml up --build
 ```
+
+Al levantar el entorno Docker, las definiciones de RabbitMQ se cargan automáticamente desde `infra/docker/rabbitmq_definitions.json`, estableciendo el entorno completo sin requerir scripts adicionales de inicialización.
 
 ## Endpoints principales
 
@@ -86,10 +90,11 @@ docker compose -f infra/docker/docker-compose.yml up --build
 - `GET /api/group` - Agrupaciones por fecha/nivel/servicio/host
 - `GET /api/export` - Exporta CSV filtrado
 - `GET /health` - Estado del backend
+- `POST /api/publish/{routing_key}` - Publica mensajes estructurados hacia RabbitMQ para simular reprocesamientos
 
 ## Extractor RabbitMQ (UI)
 
-La pantalla de extraccion RabbitMQ del frontend incluye las siguientes funcionalidades:
+La pantalla de extraccion RabbitMQ del frontend integran funcionalidades avanzadas orientadas a la evaluación y el testing:
 
 - Flujo estable `upload -> search` contra el backend.
 - Paginacion automatica para respetar limites de `page_size` del API.
@@ -99,6 +104,8 @@ La pantalla de extraccion RabbitMQ del frontend incluye las siguientes funcional
 - Columna `Error` con detalle extraido del log (`Exception caught`, `StatusCode`, etc.).
 - Copia de mensajes filtrados al portapapeles.
 - Descarga de JSON filtrado con `rabbit_name`, `timestamp`, `payload`, `error_type`, `log_error`, `parse_error`.
+- **Integración y Monitorización de RabbitMQ**: Controles de verificación de conexión de red para monitorizar que el cliente Rabbit local levanta correctamente la infraestructura.
+- **Re-publicación en RabbitMQ (Republish)**: Sistema para reenviar mensajes y payloads JSON generados a partir de los registros de error de nuevo a nuestras colas de desarrollo para emular eventos con mayor confiabilidad.
 
 Notas:
 
