@@ -1,0 +1,60 @@
+{
+  "rabbit_version": "3.9",
+  "users": [
+    {
+      "name": "invitado",
+      "password_hash": "a4M9a6vC789vA0pC7S/B0zH32+Doz2b0UvN8f4i3",
+      "hashing_algorithm": "rabbit_password_hashing_sha256",
+      "tags": "administrator"
+    }
+  ],
+  "vhosts": [
+    {
+      "name": "/"
+    }
+  ],
+  "permissions": [
+    {
+      "user": "invitado",
+      "vhost": "/",
+      "configure": ".*",
+      "write": ".*",
+      "read": ".*"
+    }
+  ],
+  "queues": [
+    { "name": "MatriculaRealizada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaAnulada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaRecuperada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaDesestimada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaReiniciada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaAmpliacionReiniciada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaAmpliacionAnulada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaAmpliacionDesestimada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaAmpliacionRecuperada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaAmpliacionRealizada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaVariacionAnulada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaVariacionRealizada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaVariacionRecuperada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "ClienteModificado", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "DefensaModificada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "ActaArchivada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "CuentaBloqueada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "CuentaDesbloqueada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaPeriodoAcademicoCambiado", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "DocumentoFirmado", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaVariacionReiniciada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "MatriculaVariacionDesestimada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "NotaFinalGenerada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "NotaDesglosadaModificada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "ExpedientesMigrados", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "ProgresoEstudianteActualizado", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "DiligenciaResuelta", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "ConvocatoriasTFECerradas", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "DiligenciaCerrada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "ActaCancelada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
+    { "name": "FechaPagoTituloSolicitado", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} }
+  ],
+  "exchanges": [],
+  "bindings": []
+}

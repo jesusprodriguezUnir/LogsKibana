@@ -29,3 +29,6 @@ services:
     environment:
       - RABBITMQ_DEFAULT_USER=invitado
       - RABBITMQ_DEFAULT_PASS=secreta
+      - RABBITMQ_MANAGEMENT_LOAD_DEFINITIONS=/etc/rabbitmq/definitions.json
+    volumes:
+      - ./rabbitmq_definitions.json:/etc/rabbitmq/definitions.json:ro
