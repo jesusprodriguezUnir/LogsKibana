@@ -500,6 +500,7 @@ table {
   width: 100%;
   border-collapse: collapse;
   font-size: 13px;
+  table-layout: fixed;
 }
 
 thead {
@@ -508,6 +509,17 @@ thead {
   z-index: 2;
   background: var(--surface-2);
 }
+
+/* Results table column widths */
+.table-wrap table td:nth-child(1) { width: 11%; min-width: 110px; }
+.table-wrap table td:nth-child(2) { width: 6%; }
+.table-wrap table td:nth-child(3) { width: 10%; }
+.table-wrap table td:nth-child(4) { width: 10%; }
+.table-wrap table td:nth-child(5) { width: 18%; }
+.table-wrap table td:nth-child(6) { width: 15%; }
+.table-wrap table td:nth-child(7) { width: 6%; }
+.table-wrap table td:nth-child(8) { width: 8%; }
+.table-wrap table td:nth-child(9) { width: 16%; }
 
 th {
   padding: 10px 12px;
@@ -528,14 +540,40 @@ th:hover { color: var(--ink); }
 th.sorted { color: var(--accent-2); }
 
 td {
-  padding: 10px 12px;
+  padding: 8px 10px;
   vertical-align: top;
   border-bottom: 1px solid var(--border);
   color: var(--ink);
-  max-width: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 tr:last-child td { border-bottom: none; }
+
+/* Truncate long text fields (logger, location) */
+.table-wrap table td:nth-child(5),
+.table-wrap table td:nth-child(6) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 11px;
+}
+
+/* Monospace columns */
+.table-wrap table td:nth-child(1),
+.table-wrap table td:nth-child(3),
+.table-wrap table td:nth-child(4),
+.table-wrap table td:nth-child(8) {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* Center align status and method columns */
+.table-wrap table td:nth-child(2),
+.table-wrap table td:nth-child(7),
+.table-wrap table td:nth-child(8) {
+  text-align: center;
+}
 
 tbody tr {
   transition: background 0.12s;
@@ -706,7 +744,45 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
 }
 
 /* ── Diagnostics table ───────────────────────────────────── */
-.diag-table th { background: var(--surface-2); }
+.diag-table {
+  table-layout: fixed;
+}
+
+.diag-table th { 
+  background: var(--surface-2);
+  word-break: break-word;
+}
+
+.diag-table th:nth-child(1) { width: 15%; }
+.diag-table th:nth-child(2) { width: 12%; }
+.diag-table th:nth-child(3) { width: 65%; }
+.diag-table th:nth-child(4) { width: 8%; text-align: center; }
+
+.diag-table td:nth-child(1) { 
+  font-size: 12px;
+  padding: 8px 10px;
+}
+
+.diag-table td:nth-child(2) { 
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.diag-table td:nth-child(3) { 
+  padding: 8px 10px;
+  font-size: 11px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  color: var(--ink-muted);
+}
+
+.diag-table td:nth-child(4) { 
+  padding: 8px 10px;
+  text-align: center;
+  font-weight: 600;
+}
 
 /* ── Loading skeleton ─────────────────────────────────────── */
 .skeleton {

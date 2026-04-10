@@ -318,10 +318,10 @@ export function LogExplorer() {
               <tbody>
                 {groups.diagnostics.map((item, i) => (
                   <tr key={`diag-${i}`}>
-                    <td className="mono">{item.service}</td>
+                    <td>{item.service}</td>
                     <td><span className="level-badge warning">{item.status_code}</span></td>
-                    <td className="mono" style={{ fontSize: 11 }}>{item.logger}</td>
-                    <td><strong>{item.count}</strong></td>
+                    <td title={item.logger}>{item.logger}</td>
+                    <td>{item.count}</td>
                   </tr>
                 ))}
               </tbody>
@@ -388,14 +388,14 @@ export function LogExplorer() {
             <tbody>
               {rows.map((row, idx) => (
                 <tr key={`${row.timestamp}-${idx}`}>
-                  <td className="mono" style={{ whiteSpace: "nowrap", fontSize: 11 }}>{row.timestamp}</td>
+                  <td title={row.timestamp}>{row.timestamp}</td>
                   <td><LevelBadge level={row.level} /></td>
-                  <td className="mono">{row.service}</td>
-                  <td className="mono">{row.host}</td>
-                  <td className="mono" style={{ fontSize: 11 }}>{row.logger}</td>
-                  <td className="mono" style={{ fontSize: 11 }}>{row.location}</td>
+                  <td title={row.service}>{row.service}</td>
+                  <td title={row.host}>{row.host}</td>
+                  <td title={row.logger}>{row.logger}</td>
+                  <td title={row.location}>{row.location}</td>
                   <td><span className="level-badge info">{row.method}</span></td>
-                  <td className="mono">{row.status_code}</td>
+                  <td title={row.status_code}>{row.status_code}</td>
                   <td><MessageCell text={row.message} /></td>
                 </tr>
               ))}

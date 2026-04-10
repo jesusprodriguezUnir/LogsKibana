@@ -23,38 +23,955 @@
     }
   ],
   "queues": [
-    { "name": "MatriculaRealizada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaAnulada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaRecuperada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaDesestimada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaReiniciada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaAmpliacionReiniciada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaAmpliacionAnulada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaAmpliacionDesestimada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaAmpliacionRecuperada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaAmpliacionRealizada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaVariacionAnulada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaVariacionRealizada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaVariacionRecuperada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "ClienteModificado", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "DefensaModificada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "ActaArchivada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "CuentaBloqueada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "CuentaDesbloqueada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaPeriodoAcademicoCambiado", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "DocumentoFirmado", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaVariacionReiniciada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "MatriculaVariacionDesestimada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "NotaFinalGenerada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "NotaDesglosadaModificada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "ExpedientesMigrados", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "ProgresoEstudianteActualizado", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "DiligenciaResuelta", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "ConvocatoriasTFECerradas", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "DiligenciaCerrada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "ActaCancelada", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
-    { "name": "FechaPagoTituloSolicitado", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} }
+    {
+      "name": "MatriculaRealizada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAnulada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaRecuperada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaDesestimada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaReiniciada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAmpliacionReiniciada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAmpliacionAnulada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAmpliacionDesestimada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAmpliacionRecuperada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAmpliacionRealizada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaVariacionAnulada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaVariacionRealizada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaVariacionRecuperada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "ClienteModificado",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "DefensaModificada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "ActaArchivada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "CuentaBloqueada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "CuentaDesbloqueada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaPeriodoAcademicoCambiado",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "DocumentoFirmado",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaVariacionReiniciada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaVariacionDesestimada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "NotaFinalGenerada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "NotaDesglosadaModificada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "ExpedientesMigrados",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "ProgresoEstudianteActualizado",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "DiligenciaResuelta",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "ConvocatoriasTFECerradas",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "DiligenciaCerrada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "ActaCancelada",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    },
+    {
+      "name": "FechaPagoTituloSolicitado",
+      "vhost": "/",
+      "durable": true,
+      "auto_delete": false,
+      "arguments": {}
+    }
   ],
-  "exchanges": [],
-  "bindings": []
+  "exchanges": [
+    {
+      "name": "MatriculaVariacionDesestimada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "FechaPagoTituloSolicitado",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaRecuperada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "DiligenciaResuelta",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "DocumentoFirmado",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAmpliacionRealizada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaVariacionAnulada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "DefensaModificada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "ActaArchivada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaReiniciada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaVariacionReiniciada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "ActaCancelada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "ProgresoEstudianteActualizado",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "NotaDesglosadaModificada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "ConvocatoriasTFECerradas",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "NotaFinalGenerada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "ClienteModificado",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaPeriodoAcademicoCambiado",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "ExpedientesMigrados",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaVariacionRealizada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAnulada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaRealizada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAmpliacionAnulada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAmpliacionDesestimada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaDesestimada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAmpliacionReiniciada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaAmpliacionRecuperada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "MatriculaVariacionRecuperada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    },
+    {
+      "name": "DiligenciaCerrada",
+      "type": "direct",
+      "durable": true,
+      "auto_delete": false,
+      "internal": false,
+      "arguments": {}
+    }
+  ],
+  "bindings": [
+    {
+      "source": "ActaArchivada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.ActaArchivadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "ActaArchivada",
+      "arguments": {}
+    },
+    {
+      "source": "ActaCancelada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.ActaCanceladaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "ActaCancelada",
+      "arguments": {}
+    },
+    {
+      "source": "ClienteModificado",
+      "destination": "Neumann.Gestor.Core.Bus.Subscriptores.GestorNeumannSubscriberElmer",
+      "destination_type": "queue",
+      "routing_key": "ClienteModificado",
+      "arguments": {}
+    },
+    {
+      "source": "ClienteModificado",
+      "destination": "ReconocimientosService.Bus.Subscriber.ReconocimientosServicesSubscriber",
+      "destination_type": "queue",
+      "routing_key": "ClienteModificado",
+      "arguments": {}
+    },
+    {
+      "source": "ClienteModificado",
+      "destination": "Unir.ErpAcademico.DistributedServices.Bus.Crm.ClientesSubscriber",
+      "destination_type": "queue",
+      "routing_key": "ClienteModificado",
+      "arguments": {}
+    },
+    {
+      "source": "ClienteModificado",
+      "destination": "Unir.ExpedicionTitulos.Core.Bus.ExpedicionTituloSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "ClienteModificado",
+      "arguments": {}
+    },
+    {
+      "source": "ClienteModificado",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.ClienteModificadoSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "ClienteModificado",
+      "arguments": {}
+    },
+    {
+      "source": "ConvocatoriasTFECerradas",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.ConvocatoriasTfeCerradasSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "ConvocatoriasTFECerradas",
+      "arguments": {}
+    },
+    {
+      "source": "DefensaModificada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.DefensaModificadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "DefensaModificada",
+      "arguments": {}
+    },
+    {
+      "source": "DiligenciaCerrada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.DiligenciaCerradaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "DiligenciaCerrada",
+      "arguments": {}
+    },
+    {
+      "source": "DiligenciaResuelta",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.DiligenciaResueltaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "DiligenciaResuelta",
+      "arguments": {}
+    },
+    {
+      "source": "DocumentoFirmado",
+      "destination": "ReconocimientosService.Bus.Subscriber.ReconocimientosServicesSubscriber",
+      "destination_type": "queue",
+      "routing_key": "DocumentoFirmado",
+      "arguments": {}
+    },
+    {
+      "source": "DocumentoFirmado",
+      "destination": "Unir.ErpAcademico.DistributedServices.Bus.PracticaAcademica.PracticaAcademicaSuscriber",
+      "destination_type": "queue",
+      "routing_key": "DocumentoFirmado",
+      "arguments": {}
+    },
+    {
+      "source": "DocumentoFirmado",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.SignedDocumentSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "DocumentoFirmado",
+      "arguments": {}
+    },
+    {
+      "source": "ExpedientesMigrados",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.ExpedientesMigradosSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "ExpedientesMigrados",
+      "arguments": {}
+    },
+    {
+      "source": "FechaPagoTituloSolicitado",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.PaymentDateRequestTitleSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "FechaPagoTituloSolicitado",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAmpliacionAnulada",
+      "destination": "Aca.EspaciosPresenciales.Be.Application.Bus.Subscriptions.ErpAcademic.MatriculaAmpliacionAnulada.MatriculaAmpliacionAnuladaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAmpliacionAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAmpliacionAnulada",
+      "destination": "Neumann.Gestor.Core.Bus.Subscriptores.GestorNeumannSubscriberElmer",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAmpliacionAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAmpliacionAnulada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaAmpliacionAnuladaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAmpliacionAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAmpliacionDesestimada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaAmpliacionDesestimadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAmpliacionDesestimada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAmpliacionRealizada",
+      "destination": "Aca.EspaciosPresenciales.Be.Application.Bus.Subscriptions.ErpAcademic.MatriculaAmpliacionRealizada.MatriculaAmpliacionRealizadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAmpliacionRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAmpliacionRealizada",
+      "destination": "Neumann.Gestor.Core.Bus.Subscriptores.GestorNeumannSubscriberElmer",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAmpliacionRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAmpliacionRealizada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaAmpliacionRealizadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAmpliacionRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAmpliacionRecuperada",
+      "destination": "Aca.EspaciosPresenciales.Be.Application.Bus.Subscriptions.ErpAcademic.MatriculaAmpliacionRecuperada.MatriculaAmpliacionRecuperadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAmpliacionRecuperada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAmpliacionRecuperada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaAmpliacionRecuperadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAmpliacionRecuperada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAmpliacionReiniciada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaAmpliacionReiniciadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAmpliacionReiniciada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAnulada",
+      "destination": "Aca.EspaciosPresenciales.Be.Application.Bus.Subscriptions.ErpAcademic.MatriculaAnulada.MatriculaAnuladaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAnulada",
+      "destination": "Neumann.Gestor.Core.Bus.Subscriptores.GestorNeumannSubscriberElmer",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAnulada",
+      "destination": "Unir.ErpAcademico.DistributedServices.Bus.PracticaMatricula.PracticaMatriculaAnuladaSuscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAnulada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaAnuladaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAnulada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorDonaghySubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAnulada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorElmerSubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAnulada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorMarceloSubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaAnulada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorSubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaDesestimada",
+      "destination": "Neumann.Gestor.Core.Bus.Subscriptores.GestorNeumannSubscriberElmer",
+      "destination_type": "queue",
+      "routing_key": "MatriculaDesestimada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaDesestimada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaDesestimadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaDesestimada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaPeriodoAcademicoCambiado",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaPeriodoAcademicoCambiadoSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaPeriodoAcademicoCambiado",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRealizada",
+      "destination": "Aca.EspaciosPresenciales.Be.Application.Bus.Subscriptions.ErpAcademic.MatriculaRealizada.MatriculaRealizadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRealizada",
+      "destination": "Aca.EspaciosPresenciales.Be.Application.Bus.Subscriptions.ErpAcademic.MatriculaRealizadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRealizada",
+      "destination": "Neumann.Gestor.Core.Bus.Subscriptores.GestorNeumannSubscriberElmer",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRealizada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.ExpendientesSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRealizada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaRealizadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRealizada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorDonaghySubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRealizada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorElmerSubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRealizada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorMarceloSubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRealizada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorSubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRecuperada",
+      "destination": "Aca.EspaciosPresenciales.Be.Application.Bus.Subscriptions.ErpAcademic.MatriculaRecuperada.MatriculaRecuperadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRecuperada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRecuperada",
+      "destination": "Neumann.Gestor.Core.Bus.Subscriptores.GestorNeumannSubscriberElmer",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRecuperada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaRecuperada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaRecuperadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRecuperada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaReiniciada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorElmerSubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaReiniciada",
+      "destination": "Neumann.Gestor.Core.Bus.Subscriptores.GestorNeumannSubscriberElmer",
+      "destination_type": "queue",
+      "routing_key": "MatriculaReiniciada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaReiniciada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaReiniciadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaReiniciada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaReiniciada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorDonaghySubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaReiniciada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaReiniciada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorElmerSubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaReiniciada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaReiniciada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorMarceloSubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaReiniciada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaReiniciada",
+      "destination": "Unir.IntegracionesFunir.Bus.GestorSubscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaReiniciada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionAnulada",
+      "destination": "Aca.EspaciosPresenciales.Be.Application.Bus.Subscriptions.ErpAcademic.MatriculaVariacionAnulada.MatriculaVariacionAnuladaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionAnulada",
+      "destination": "Neumann.Gestor.Core.Bus.Subscriptores.GestorNeumannSubscriberElmer",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionAnulada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaVariacionAnuladaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionAnulada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionDesestimada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.ExpendientesSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionDesestimada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionDesestimada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaVariacionDesestimadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionDesestimada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionRealizada",
+      "destination": "Aca.EspaciosPresenciales.Be.Application.Bus.Subscriptions.ErpAcademic.MatriculaVariacionRealizada.MatriculaVariacionRealizadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionRealizada",
+      "destination": "Neumann.Gestor.Core.Bus.Subscriptores.GestorNeumannSubscriberElmer",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionRealizada",
+      "destination": "Unir.ErpAcademico.DistributedServices.Bus.PracticaMatricula.PracticaMatriculaSuscriber",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionRealizada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaVariacionRealizadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionRealizada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionRecuperada",
+      "destination": "Aca.EspaciosPresenciales.Be.Application.Bus.Subscriptions.ErpAcademic.MatriculaVariacionRecuperada.MatriculaVariacionRecuperadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionRecuperada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionRecuperada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaVariacionRecuperadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionRecuperada",
+      "arguments": {}
+    },
+    {
+      "source": "MatriculaVariacionReiniciada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.MatriculaVariacionReiniciadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "MatriculaVariacionReiniciada",
+      "arguments": {}
+    },
+    {
+      "source": "NotaDesglosadaModificada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.NotaDesglosadaModificadaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "NotaDesglosadaModificada",
+      "arguments": {}
+    },
+    {
+      "source": "NotaFinalGenerada",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.NotaFinalGeneradaSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "NotaFinalGenerada",
+      "arguments": {}
+    },
+    {
+      "source": "ProgresoEstudianteActualizado",
+      "destination": "Unir.Expedientes.WebUi.Subscriptions.ProgresoEstudianteActualizadoSubscriptor",
+      "destination_type": "queue",
+      "routing_key": "ProgresoEstudianteActualizado",
+      "arguments": {}
+    }
+  ]
 }

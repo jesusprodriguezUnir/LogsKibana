@@ -1,5 +1,7 @@
 README.md
 pyproject.toml
+src/scratch_rabbit.py
+src/scratch_test.py
 src/api/__init__.py
 src/api/main.py
 src/api/routes/__init__.py
