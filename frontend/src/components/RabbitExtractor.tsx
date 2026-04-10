@@ -182,12 +182,34 @@ export default function RabbitExtractor() {
 
   // ── Handlers ────────────────────────────────────────────────────────────────
 
+  const publishToLocalRabbit = async (row: RabbitRow) => {
+    if (!row.rabbitPayload || !row.rabbitName) {
+      alert("Faltan datos para publicar");
+      return;
+    }
+    try {
+      const res = await requestJson<{status: string, message: string}>("/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rabbit_name: row.rabbitName,
+          payload: row.rabbitPayload
+        })
+      });
+      alert(`✅ ${res.message}`);
+    } catch (err: unknown) {
+      alert(`❌ Error publicando en RabbitMQ local: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
   const handleUpload = async (file: File) => {
     setLoading(true);
     setError(null);
     setRows([]);
     setSessionId("");
     setCopied(false);
+    setSelectedRabbitNames([]);
+    setPayloadFilters({});
     try {
       const form = new FormData();
       form.append("file", file);

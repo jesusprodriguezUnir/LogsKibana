@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, NavLink, Route, Routes } from "react-router-dom";
 import LogExplorer from "./App";
 import RabbitExtractor from "./components/RabbitExtractor";
+import RabbitConfig from "./components/RabbitConfig";
 import "./styles.css";
 
 function Root() {
@@ -30,6 +31,12 @@ function Root() {
           >
             🐇 RabbitMQ
           </NavLink>
+          <NavLink
+            to="/config"
+            className={({ isActive }) => `navbar__link${isActive ? " active" : ""}`}
+          >
+            ⚙️ Configuración
+          </NavLink>
         </div>
 
         <div className="navbar__spacer" />
@@ -47,6 +54,7 @@ function Root() {
       <Routes>
         <Route path="/"       element={<LogExplorer />} />
         <Route path="/rabbit" element={<RabbitExtractor />} />
+        <Route path="/config" element={<RabbitConfig />} />
       </Routes>
     </div>
   );

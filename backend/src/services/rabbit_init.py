@@ -25,7 +25,7 @@ async def ensure_queues_exist(retries: int = 5, delay: int = 5):
     Asegura que todas las colas de desarrollo existan en el RabbitMQ local.
     Intenta conectar varias veces si RabbitMQ no está listo.
     """
-    rabbit_url = os.environ.get("RABBITMQ_URL", "amqp://invitado:secreta@rabbitmq:5672/")
+    rabbit_url = os.environ.get("RABBITMQ_URL", "amqp://invitado:secreta@127.0.0.1:5672/")
     
     for i in range(retries):
         try:

@@ -7,6 +7,8 @@ services:
       dockerfile: infra/docker/backend.Dockerfile
     ports:
       - "8000:8000"
+    environment:
+      - RABBITMQ_URL=amqp://invitado:secreta@rabbitmq:5672/
 
   frontend:
     image: node:20-alpine
