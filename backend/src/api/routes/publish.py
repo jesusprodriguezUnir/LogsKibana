@@ -3,8 +3,8 @@ from pydantic import BaseModel
 import aio_pika
 import json
 import logging
-import os
 from services.rabbit_init import RABBIT_QUEUES
+from services.rabbit_settings import get_rabbit_settings
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -13,16 +13,33 @@ class PublishRequest(BaseModel):
     rabbit_name: str
     payload: dict
 
-@router.post("/publish")
+
+def _rabbit_disabled_detail() -> str:
+    return "RabbitMQ está deshabilitado en este entorno (RABBITMQ_ENABLED=false)."
+
+
+def _rabbit_unavailable_detail(error: str) -> str:
+    return f"RabbitMQ no disponible: {error}. La API principal sigue operativa en modo degradado."
+
+@router.post(
+    "/publish",
+    responses={
+        503: {
+            "description": "RabbitMQ no disponible o deshabilitado (modo degradado)."
+        }
+    },
+)
 async def publish_message(request: PublishRequest):
     """
     Publica un mensaje (payload JSON) hacia RabbitMQ local
     usando rabbit_name como routing key en el exchange por defecto.
     """
     try:
-        # Por defecto asume que estás corriendo en local (127.0.0.1)
-        # Si estás en Docker, debes definir la variable apuntando a "rabbitmq"
-        rabbit_url = os.environ.get("RABBITMQ_URL", "amqp://invitado:secreta@127.0.0.1:5672/")
+        settings = get_rabbit_settings()
+        if not settings.enabled:
+            raise HTTPException(status_code=503, detail=_rabbit_disabled_detail())
+
+        rabbit_url = settings.url
         
         connection = await aio_pika.connect_robust(rabbit_url)
         
@@ -49,20 +66,33 @@ async def publish_message(request: PublishRequest):
                 "message": f"Mensaje publicado con éxito a la cola '{request.rabbit_name}'"
             }
             
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error publishing to RabbitMQ: {str(e)}")
+        logger.warning(f"RabbitMQ no disponible para publish: {str(e)}")
         raise HTTPException(
-            status_code=500,
-            detail=f"Error conectando o publicando en RabbitMQ local: {str(e)}"
+            status_code=503,
+            detail=_rabbit_unavailable_detail(str(e))
         )
 
-@router.get("/queues")
+@router.get(
+    "/queues",
+    responses={
+        503: {
+            "description": "RabbitMQ no disponible o deshabilitado (modo degradado)."
+        }
+    },
+)
 async def get_queues():
     """
     Obtiene el listado de colas y el número de mensajes de cada una.
     """
     try:
-        rabbit_url = os.environ.get("RABBITMQ_URL", "amqp://invitado:secreta@127.0.0.1:5672/")
+        settings = get_rabbit_settings()
+        if not settings.enabled:
+            raise HTTPException(status_code=503, detail=_rabbit_disabled_detail())
+
+        rabbit_url = settings.url
         connection = await aio_pika.connect_robust(rabbit_url)
         stats = []
         
@@ -85,9 +115,11 @@ async def get_queues():
                         "error": str(e)
                     })
         return {"queues": stats}
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"Error getting RabbitMQ queues: {str(e)}")
+        logger.warning(f"RabbitMQ no disponible para consultar colas: {str(e)}")
         raise HTTPException(
-            status_code=500,
-            detail=f"Error obteniendo colas de RabbitMQ local: {str(e)}"
+            status_code=503,
+            detail=_rabbit_unavailable_detail(str(e))
         )

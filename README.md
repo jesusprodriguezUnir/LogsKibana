@@ -9,6 +9,73 @@ Aplicacion web para procesar CSV de logs de Kibana en entorno local: carga, busq
 - Tests unitarios: pytest (backend) y vitest (frontend).
 - Docker: backend y compose para entorno local.
 
+### Diagrama de componentes
+
+```mermaid
+flowchart LR
+    User[👤 Usuario]
+    
+    subgraph Frontend["🎨 Frontend - React + Vite"]
+        App["App.tsx<br/>Orquestador"]
+        UploadDropzone["UploadDropzone<br/>Carga CSV"]
+        RabbitExtractor["RabbitExtractor<br/>Extrae de RabbitMQ"]
+        RabbitConfig["RabbitConfig<br/>Config RabbitMQ"]
+        UI["Components<br/>LevelBadge, MessageCell"]
+        ApiClient["services/api.ts<br/>Cliente HTTP"]
+    end
+    
+    subgraph Backend["⚙️ Backend - FastAPI + Python"]
+        Main["api/main.py<br/>Punto de entrada"]
+        
+        subgraph Routers["📡 API Routers"]
+            UploadRoute["/upload<br/>Recibe CSV"]
+            QueryRoute["/query<br/>Consulta y filtros"]
+            PublishRoute["/publish<br/>Publica a RabbitMQ"]
+        end
+        
+        subgraph Services["🔧 Servicios Core"]
+            CSVProcessor["csv_processor.py<br/>Parsea CSV"]
+            QueryEngine["query_engine.py<br/>Filtros, grouping, sort"]
+            Store["store.py<br/>Sesiones en memoria"]
+            PayloadParser["payload_parsers.py<br/>Parsea payloads"]
+            RabbitInit["rabbit_init.py<br/>Init colas RabbitMQ"]
+        end
+    end
+    
+    RabbitMQ["🐰 RabbitMQ<br/>Message Broker"]
+    CSVInput["📁 Archivos CSV<br/>Input de usuario"]
+    
+    User -->|Accede| App
+    App -->|Render| UploadDropzone
+    App -->|Render| RabbitExtractor
+    App -->|Render| RabbitConfig
+    App -->|Render| UI
+    
+    UploadDropzone -->|POST /upload| ApiClient
+    RabbitExtractor -->|GET /query| ApiClient
+    RabbitConfig -->|POST /publish| ApiClient
+    
+    ApiClient -->|HTTP| UploadRoute
+    ApiClient -->|HTTP| QueryRoute
+    ApiClient -->|HTTP| PublishRoute
+    
+    UploadRoute -->|parsea| CSVProcessor
+    CSVProcessor -->|guarda| Store
+    
+    QueryRoute -->|aplica| QueryEngine
+    QueryEngine -->|consulta| Store
+    QueryEngine -->|retorna datos| QueryRoute
+    
+    PublishRoute -->|publica| PayloadParser
+    PayloadParser -->|envía| RabbitMQ
+    
+    Main -->|inicia| RabbitInit
+    RabbitInit -->|configura| RabbitMQ
+    
+    CSVInput -->|upload| UploadDropzone
+    RabbitMQ -->|consume| RabbitExtractor
+```
+
 ## Requisitos
 
 - Python 3.11+
@@ -55,7 +122,10 @@ Si el backend vive en otra URL, define `VITE_API_URL`.
 ## Variables de entorno para local
 
 - Frontend: copia `frontend/.env.example` como `frontend/.env.local`.
-- Backend: copia `backend/.env.example` como `backend/.env` si quieres personalizar host o puerto.
+- Backend: copia `backend/.env.example` como `backend/.env` si quieres personalizar host, puerto o RabbitMQ.
+- Si RabbitMQ no esta disponible, la API levanta igual en modo degradado:
+    - Endpoints de logs (`/api/upload`, `/api/search`, `/api/group`, `/api/export`) siguen operativos.
+    - Endpoints Rabbit (`/api/publish`, `/api/queues`) responden `503`.
 
 ## Tests
 
@@ -82,6 +152,11 @@ docker compose -f infra/docker/docker-compose.yml up --build
 ```
 
 Al levantar el entorno Docker, las definiciones de RabbitMQ se cargan automáticamente desde `infra/docker/rabbitmq_definitions.json`, estableciendo el entorno completo sin requerir scripts adicionales de inicialización.
+
+Credenciales RabbitMQ por defecto en Docker local:
+
+- Usuario: `devuser`
+- Password: `devpassword`
 
 ## Endpoints principales
 

@@ -8,7 +8,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - RABBITMQ_URL=amqp://invitado:secreta@rabbitmq:5672/
+      - RABBITMQ_ENABLED=true
+      - RABBITMQ_URL=amqp://devuser:devpassword@rabbitmq:5672/
 
   frontend:
     image: node:20-alpine
@@ -29,8 +30,8 @@ services:
       - "5672:5672"
       - "15672:15672"
     environment:
-      - RABBITMQ_DEFAULT_USER=invitado
-      - RABBITMQ_DEFAULT_PASS=secreta
+      - RABBITMQ_DEFAULT_USER=devuser
+      - RABBITMQ_DEFAULT_PASS=devpassword
       - RABBITMQ_MANAGEMENT_LOAD_DEFINITIONS=/etc/rabbitmq/definitions.json
     volumes:
       - ./rabbitmq_definitions.json:/etc/rabbitmq/definitions.json:ro

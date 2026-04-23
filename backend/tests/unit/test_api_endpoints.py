@@ -2,6 +2,7 @@
 import io
 import zipfile
 from uuid import uuid4
+from unittest.mock import AsyncMock, patch
 
 import pandas as pd
 import pytest
@@ -175,3 +176,27 @@ def test_export_zip_empty_session(client: TestClient, session: str) -> None:
     bio = io.BytesIO(resp.content)
     with zipfile.ZipFile(bio, "r") as zf:
         assert len(zf.namelist()) == 0
+
+
+# ─── /api/publish y /api/queues (modo degradado Rabbit) ───────────────────
+
+def test_publish_returns_503_when_rabbit_disabled(client: TestClient) -> None:
+    with patch("api.routes.publish.get_rabbit_settings") as mock_settings:
+        mock_settings.return_value.enabled = False
+        payload = {"rabbit_name": "MatriculaRealizada", "payload": {"ok": True}}
+        resp = client.post("/api/publish", json=payload)
+
+    assert resp.status_code == 503
+    assert "deshabilitado" in resp.json()["detail"].lower()
+
+
+def test_queues_returns_503_when_rabbit_unavailable(client: TestClient) -> None:
+    with patch("api.routes.publish.get_rabbit_settings") as mock_settings:
+        mock_settings.return_value.enabled = True
+        mock_settings.return_value.url = "amqp://devuser:devpassword@127.0.0.1:5672/"
+
+        with patch("api.routes.publish.aio_pika.connect_robust", new=AsyncMock(side_effect=Exception("broker down"))):
+            resp = client.get("/api/queues")
+
+    assert resp.status_code == 503
+    assert "modo degradado" in resp.json()["detail"].lower()

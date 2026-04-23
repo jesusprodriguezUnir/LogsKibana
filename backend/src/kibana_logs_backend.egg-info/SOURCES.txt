@@ -17,4 +17,5 @@ src/services/csv_processor.py
 src/services/payload_parsers.py
 src/services/query_engine.py
 src/services/rabbit_init.py
+src/services/rabbit_settings.py
 src/services/store.py

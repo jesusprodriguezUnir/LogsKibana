@@ -9,9 +9,11 @@ async def test_publish_and_queues():
     async with AsyncClient(transport=transport, base_url="http://test") as ac:
         # test queues endpoint
         resp = await ac.get("/api/queues")
-        assert resp.status_code == 200, f"Error obteniendo colas: {resp.text}"
-        data = resp.json()
-        assert "queues" in data
+        # En modo degradado (sin Rabbit disponible) responde 503 sin tumbar la API.
+        assert resp.status_code in (200, 503), f"Respuesta inesperada en /api/queues: {resp.text}"
+        if resp.status_code == 200:
+            data = resp.json()
+            assert "queues" in data
         
         # test publish endpoint
         publish_payload = {
@@ -20,9 +22,8 @@ async def test_publish_and_queues():
         }
         res_pub = await ac.post("/api/publish", json=publish_payload)
         
-        # SI el rabbitmq no está corriendo en 127.0.0.1:5672, esto fallará con 500
-        # Permito fallo 500 si no hay red, pero si hay red debe dar 200
+        # Si RabbitMQ no está disponible, /api/publish retorna 503 en modo degradado.
         if res_pub.status_code == 200:
             assert res_pub.json()["status"] == "ok"
         else:
-            print("Publish fallo o no accesible, ignorado en test. Status:", res_pub.status_code)
+            assert res_pub.status_code == 503
