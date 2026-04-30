@@ -3,9 +3,10 @@ import { useState } from "react";
 interface MessageCellProps {
   text: string;
   maxLength?: number;
+  onOpenDetail?: (text: string) => void;
 }
 
-export function MessageCell({ text, maxLength = 100 }: MessageCellProps) {
+export function MessageCell({ text, maxLength = 100, onOpenDetail }: Readonly<MessageCellProps>) {
   const [expanded, setExpanded] = useState(false);
   const needsTruncation = text.length > maxLength;
 
@@ -15,14 +16,25 @@ export function MessageCell({ text, maxLength = 100 }: MessageCellProps) {
         {expanded || !needsTruncation ? text : `${text.slice(0, maxLength)}…`}
       </span>
       {needsTruncation && (
-        <button
-          className="msg-cell__toggle"
-          onClick={() => setExpanded((v) => !v)}
-          type="button"
-          aria-expanded={expanded}
-        >
-          {expanded ? "▲ Colapsar" : "▼ Expandir"}
-        </button>
+        <div className="msg-cell__actions">
+          <button
+            className="msg-cell__toggle"
+            onClick={() => setExpanded((v) => !v)}
+            type="button"
+            aria-expanded={expanded}
+          >
+            {expanded ? "▲ Colapsar" : "▼ Expandir"}
+          </button>
+          {onOpenDetail && (
+            <button
+              className="msg-cell__toggle"
+              onClick={() => onOpenDetail(text)}
+              type="button"
+            >
+              Ver
+            </button>
+          )}
+        </div>
       )}
     </div>
   );

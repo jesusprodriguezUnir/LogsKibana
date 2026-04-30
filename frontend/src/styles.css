@@ -621,6 +621,12 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
 
 .msg-cell__toggle:hover { color: var(--accent-2); }
 
+.msg-cell__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Mono cell */
 .mono { font-family: var(--font-mono); font-size: 12px; }
 
@@ -890,6 +896,15 @@ tbody tr:hover { background: rgba(255,255,255,0.02); }
   word-break: break-word;
   color: var(--ink-muted);
   max-height: 400px;
+  overflow: auto;
+}
+
+.message-modal {
+  width: min(94vw, 980px);
+}
+
+.message-modal__content {
+  max-height: min(70vh, 640px);
   overflow: auto;
 }
 

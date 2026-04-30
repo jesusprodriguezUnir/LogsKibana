@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { requestJson } from "./services/api";
 import type { GroupResponse, LogRow, QueryFilters, SearchResponse } from "./types";
 import { LevelBadge } from "./components/LevelBadge";
@@ -62,6 +61,8 @@ export function LogExplorer() {
   const [sortBy,        setSortBy]        = useState("timestamp");
   const [sortOrder,     setSortOrder]     = useState("desc");
   const [groupFields,   setGroupFields]   = useState<string[]>(DEFAULT_GROUP_FIELDS);
+  const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
+  const [copiedMessage, setCopiedMessage] = useState(false);
 
   const canQuery = sessionId.length > 0;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -153,10 +154,25 @@ export function LogExplorer() {
   const topLocations  = Object.entries(groups?.groups.location    ?? {}).slice(0, 5);
   const topStatuses   = Object.entries(groups?.groups.status_code ?? {}).slice(0, 5);
 
-  const maxCount = useMemo(() =>
-    rows.length > 0 ? Math.max(...(groups ? Object.values(groups.groups.level ?? {}) : [1])) : 1,
-    [groups, rows],
-  );
+  useEffect(() => {
+    if (!selectedMessage) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelectedMessage(null);
+      }
+    };
+
+    globalThis.addEventListener("keydown", onKeyDown);
+    return () => globalThis.removeEventListener("keydown", onKeyDown);
+  }, [selectedMessage]);
+
+  async function copySelectedMessage() {
+    if (!selectedMessage) return;
+    await navigator.clipboard.writeText(selectedMessage);
+    setCopiedMessage(true);
+    setTimeout(() => setCopiedMessage(false), 1500);
+  }
 
   return (
     <div className="page">
@@ -396,7 +412,7 @@ export function LogExplorer() {
                   <td title={row.location}>{row.location}</td>
                   <td><span className="level-badge info">{row.method}</span></td>
                   <td title={row.status_code}>{row.status_code}</td>
-                  <td><MessageCell text={row.message} /></td>
+                  <td><MessageCell text={row.message} onOpenDetail={setSelectedMessage} /></td>
                 </tr>
               ))}
               {rows.length === 0 && (
@@ -439,6 +455,42 @@ export function LogExplorer() {
             ))}
           </div>
         </section>
+      )}
+
+      {selectedMessage && (
+        <div
+          className="modal-backdrop"
+          onClick={(e) => {
+            if (e.currentTarget === e.target) {
+              setSelectedMessage(null);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setSelectedMessage(null);
+            }
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Detalle de message"
+          tabIndex={-1}
+        >
+          <div className="modal message-modal">
+            <div className="modal__header">
+              <span className="modal__title">Detalle de message</span>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button className="btn btn-secondary btn-sm" onClick={() => void copySelectedMessage()}>
+                  Copiar
+                </button>
+                <button className="btn btn-ghost btn-sm" onClick={() => setSelectedMessage(null)}>
+                  Cerrar
+                </button>
+              </div>
+            </div>
+            {copiedMessage && <div className="copied-toast" style={{ marginBottom: 10 }}>Copiado</div>}
+            <pre className="message-modal__content">{selectedMessage}</pre>
+          </div>
+        </div>
       )}
     </div>
   );
