@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 
 import pandas as pd
 from datetime import datetime
+from services.event_schemas import extract_event_fields
 from services.payload_parsers import extract_json_payload
 
 REQUIRED_COLUMNS = ["timestamp", "message"]
@@ -152,76 +153,43 @@ def normalize_dataframe(df: pd.DataFrame) -> pd.DataFrame:
     timestamp_text = renamed["timestamp"].astype(str).str.replace(" @ ", " ", regex=False)
     renamed["timestamp"] = pd.to_datetime(timestamp_text, errors="coerce", utc=True)
 
+    rows_before = len(renamed)
     renamed = renamed.dropna(subset=["timestamp"])
+    rows_after = len(renamed)
     renamed["date"] = renamed["timestamp"].dt.strftime("%Y-%m-%d")
-    # Extraer campos del payload para mensajes de RabbitMQ
-    def _extract_payload_fields(row: pd.Series) -> pd.Series:
-        msg = str(row.get("message", ""))
-        
-        parsed = extract_json_payload(msg)
-        if not parsed:
-            return row
-            
-        if "ActaArchivada" in msg:
-            row["payload_IdActa"] = int(parsed.get("IdActa") or parsed.get("idActa") or 0) if parsed.get("IdActa") or parsed.get("idActa") else None
-            # Mantener compatibilidad anterior
-            fecha_val = parsed.get("Fecha") or parsed.get("fecha")
-            if fecha_val:
-                try:
-                    row["payload_Fecha"] = pd.to_datetime(fecha_val, errors="coerce", utc=True)
-                except Exception:
-                    row["payload_Fecha"] = pd.to_datetime(str(fecha_val), errors="coerce", utc=True)
-            else:
-                row["payload_Fecha"] = None
 
-            row["payload_IdClase"] = int(parsed.get("IdClase") or parsed.get("idClase") or 0) if parsed.get("IdClase") or parsed.get("idClase") else None
-            row["payload_TipoEvaluacion"] = parsed.get("TipoEvaluacion") or parsed.get("tipoEvaluacion")
-            row["payload_IdAlumnoIntegracion"] = parsed.get("IdAlumnoIntegracion") or parsed.get("idAlumnoIntegracion")
-            row["payload_OrigenActa"] = parsed.get("OrigenActa") or parsed.get("origenActa")
-            
-        elif "NotaFinalGenerada" in msg:
-            row["payload_Plataforma"] = parsed.get("Plataforma")
-            row["payload_Provisional"] = parsed.get("Provisional")
-            row["payload_IdCurso"] = parsed.get("IdCurso")
-            row["payload_IdUsuarioPublicadorConfirmador"] = parsed.get("IdUsuarioPublicadorConfirmador")
-            row["payload_IdActa"] = parsed.get("IdActa")
-            notas = parsed.get("Notas", [])
-            if isinstance(notas, list):
-                row["payload_Notas_IdAlumno"] = ",".join(str(n.get("IdAlumno", "")) for n in notas if n.get("IdAlumno") is not None)
-                row["payload_Notas_Convocatoria"] = ",".join(str(n.get("Convocatoria", "")) for n in notas if n.get("Convocatoria") is not None)
-                
-        elif "DiligenciaCerrada" in msg:
-            row["payload_IdActa"] = parsed.get("IdActa")
-            row["payload_IdDiligencia"] = parsed.get("IdDiligencia")
-            row["payload_FechaCierre"] = parsed.get("FechaCierre")
-            nat = parsed.get("NaturalezaDiligencia")
-            if isinstance(nat, dict):
-                row["payload_NaturalezaDiligencia_Id"] = nat.get("Id")
-                row["payload_NaturalezaDiligencia_Descripcion"] = nat.get("Descripcion")
-                
-        elif "NotaDesglosadaModificada" in msg:
-            row["payload_IdAlumno"] = parsed.get("IdAlumno")
-            row["payload_IdEstudio"] = parsed.get("IdEstudio")
-            row["payload_IdAsignatura"] = parsed.get("IdAsignatura")
-            row["payload_IdCurso"] = parsed.get("IdCurso")
-            row["payload_AnyoAcademico"] = parsed.get("AnyoAcademico")
-            
-        elif "MatriculaRealizada" in msg:
-            row["payload_UniversidadIdIntegracion"] = parsed.get("UniversidadIdIntegracion")
-            row["payload_MatriculaIdIntegracion"] = parsed.get("MatriculaIdIntegracion")
-            row["payload_EsMatriculaNuevoIngreso"] = parsed.get("EsMatriculaNuevoIngreso")
-            row["payload_AlumnoIdIntegracion"] = parsed.get("AlumnoIdIntegracion")
-            row["payload_NumeroDocumento"] = parsed.get("NumeroDocumento")
-            row["payload_IdPlanOfertado"] = parsed.get("IdPlanOfertado")
-            row["payload_IdViaAcceso"] = parsed.get("IdViaAcceso")
-            row["payload_OperacionVentaIdIntegracion"] = parsed.get("OperacionVentaIdIntegracion")
+    # Extraer campos del payload de mensajes RabbitMQ mediante el registro
+    # declarativo de esquemas. Solo se procesan las filas con marcador de evento
+    # (minoría), evitando el coste de `apply` fila a fila sobre todo el DataFrame.
+    renamed = _attach_payload_fields(renamed)
 
-        return row
-
-
-    renamed = renamed.apply(_extract_payload_fields, axis=1)
+    # Estadísticas de ingesta (p. ej. filas con timestamp no parseable descartadas).
+    renamed.attrs["rows_read"] = rows_before
+    renamed.attrs["rows_valid"] = rows_after
+    renamed.attrs["rows_dropped"] = rows_before - rows_after
 
     return renamed
+
+
+def _attach_payload_fields(df: pd.DataFrame) -> pd.DataFrame:
+    if df.empty:
+        return df
+
+    extracted: dict[int, dict[str, object]] = {}
+    for idx, message in df["message"].items():
+        msg = str(message)
+        parsed = extract_json_payload(msg)
+        if not parsed:
+            continue
+        fields = extract_event_fields(msg, parsed)
+        if fields:
+            extracted[idx] = fields
+
+    if not extracted:
+        return df
+
+    payload_df = pd.DataFrame.from_dict(extracted, orient="index")
+    return df.join(payload_df)
 
 
 def parse_csv_text(csv_text: str) -> pd.DataFrame:

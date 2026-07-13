@@ -32,6 +32,7 @@ class FilterParams:
     location_text: str | None = None
     timestamp_from: str | None = None
     timestamp_to: str | None = None
+    rabbit_names: str | None = None
 
 
 @dataclass
@@ -55,12 +56,14 @@ def get_filter_params(
     location_text: Annotated[str | None, Query()] = None,
     timestamp_from: Annotated[str | None, Query()] = None,
     timestamp_to: Annotated[str | None, Query()] = None,
+    rabbit_names: Annotated[str | None, Query()] = None,
 ) -> FilterParams:
     return FilterParams(
         text=text, level=level, service=service, host=host,
         logger=logger, location=location, status_code=status_code,
         message_text=message_text, logger_text=logger_text, location_text=location_text,
         timestamp_from=timestamp_from, timestamp_to=timestamp_to,
+        rabbit_names=rabbit_names,
     )
 
 
@@ -91,6 +94,7 @@ def _resolve_and_filter(df: pd.DataFrame, filters: FilterParams, request: Reques
         location_text=filters.location_text,
         timestamp_from=filters.timestamp_from,
         timestamp_to=filters.timestamp_to,
+        rabbit_names=filters.rabbit_names,
     )
 
     if request is None:
@@ -125,13 +129,13 @@ def _resolve_and_filter(df: pd.DataFrame, filters: FilterParams, request: Reques
             if col not in filtered.columns:
                 continue
             if pd.api.types.is_string_dtype(filtered[col]) or filtered[col].dtype == object:
-                filtered = filtered[filtered[col].astype(str).str.contains(value, case=False, na=False)]
+                filtered = filtered[filtered[col].astype(str).str.contains(value, case=False, na=False, regex=False)]
             else:
                 try:
                     num = float(value)
                     filtered = filtered[pd.to_numeric(filtered[col], errors="coerce") == num]
                 except Exception:
-                    filtered = filtered[filtered[col].astype(str).str.contains(value, case=False, na=False)]
+                    filtered = filtered[filtered[col].astype(str).str.contains(value, case=False, na=False, regex=False)]
 
     return filtered
 

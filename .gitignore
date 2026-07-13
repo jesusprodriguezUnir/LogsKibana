@@ -16,6 +16,9 @@ coverage/
 # Env
 .env
 .env.*
+# ...pero versionamos las plantillas de ejemplo
+!.env.example
+!.env.local.example
 
 # OS
 .DS_Store

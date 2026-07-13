@@ -9,10 +9,14 @@ Requires-Dist: uvicorn[standard]==0.32.0
 Requires-Dist: pandas==2.2.3
 Requires-Dist: python-multipart==0.0.12
 Requires-Dist: pydantic==2.9.2
+Requires-Dist: pydantic-settings==2.5.2
 Requires-Dist: aio-pika==9.5.4
+Requires-Dist: pyarrow==17.0.0
 Provides-Extra: dev
 Requires-Dist: pytest==8.3.3; extra == "dev"
+Requires-Dist: pytest-cov==5.0.0; extra == "dev"
 Requires-Dist: httpx==0.27.2; extra == "dev"
+Requires-Dist: ruff==0.6.9; extra == "dev"
 
 # Backend API
 

@@ -1,4 +1,2 @@
 api
-scratch_rabbit
-scratch_test
 services

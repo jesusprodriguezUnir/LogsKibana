@@ -42,14 +42,28 @@ def apply_filters(
     location_text: str | None = None,
     timestamp_from: str | None = None,
     timestamp_to: str | None = None,
+    rabbit_names: str | None = None,
 ) -> pd.DataFrame:
     result = df
 
+    # IMPORTANTE: regex=False en todas las búsquedas de texto libre. El input
+    # proviene de la UI; interpretarlo como regex habilita inyección/ReDoS y
+    # provoca errores 500 con caracteres como '('.
     if text:
-        mask = result["message"].str.contains(text, case=False, na=False)
+        mask = result["message"].str.contains(text, case=False, na=False, regex=False)
         result = result[mask]
     if message_text:
-        result = result[result["message"].str.contains(message_text, case=False, na=False)]
+        result = result[result["message"].str.contains(message_text, case=False, na=False, regex=False)]
+    if rabbit_names:
+        # Contrato explícito para filtrar por uno o varios nombres de evento
+        # Rabbit (OR literal), sustituyendo el antiguo uso implícito de regex
+        # "A|B" en message_text.
+        names = [n.strip() for n in rabbit_names.split(",") if n.strip()]
+        if names:
+            mask = pd.Series(False, index=result.index)
+            for name in names:
+                mask |= result["message"].str.contains(name, case=False, na=False, regex=False)
+            result = result[mask]
     if level:
         result = result[result["level"] == level.lower()]
     if service:
@@ -63,9 +77,9 @@ def apply_filters(
     if status_code:
         result = result[result["status_code"].str.lower() == status_code.lower()]
     if logger_text:
-        result = result[result["logger"].str.contains(logger_text, case=False, na=False)]
+        result = result[result["logger"].str.contains(logger_text, case=False, na=False, regex=False)]
     if location_text:
-        result = result[result["location"].str.contains(location_text, case=False, na=False)]
+        result = result[result["location"].str.contains(location_text, case=False, na=False, regex=False)]
     if timestamp_from:
         dt = pd.to_datetime(timestamp_from, utc=True, errors="coerce")
         if pd.notna(dt):

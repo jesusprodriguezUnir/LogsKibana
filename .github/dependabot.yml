@@ -1,0 +1,27 @@
+version: 2
+updates:
+  # Dependencias Python del backend
+  - package-ecosystem: "pip"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      backend-deps:
+        patterns: ["*"]
+
+  # Dependencias npm del frontend
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    groups:
+      frontend-deps:
+        patterns: ["*"]
+
+  # Actions usadas en los workflows de CI
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

@@ -1,8 +1,12 @@
-import os
+"""Vista de configuración específica de RabbitMQ.
+
+Mantiene la interfaz `RabbitSettings` / `get_rabbit_settings()` usada por el
+resto del backend y los tests, delegando en la configuración centralizada
+(`services.config`) como única fuente de verdad.
+"""
 from dataclasses import dataclass
 
-
-DEFAULT_RABBIT_URL = "amqp://devuser:devpassword@127.0.0.1:5672/"
+from services.config import get_settings
 
 
 @dataclass(frozen=True)
@@ -13,16 +17,11 @@ class RabbitSettings:
     retry_delay_seconds: int
 
 
-def _as_bool(raw: str | None, default: bool = True) -> bool:
-    if raw is None:
-        return default
-    return raw.strip().lower() not in {"0", "false", "off", "no"}
-
-
 def get_rabbit_settings() -> RabbitSettings:
+    s = get_settings()
     return RabbitSettings(
-        enabled=_as_bool(os.environ.get("RABBITMQ_ENABLED"), default=True),
-        url=os.environ.get("RABBITMQ_URL", DEFAULT_RABBIT_URL),
-        retries=int(os.environ.get("RABBITMQ_RETRIES", "5")),
-        retry_delay_seconds=int(os.environ.get("RABBITMQ_RETRY_DELAY", "5")),
+        enabled=s.rabbit_enabled,
+        url=s.rabbitmq_url,
+        retries=s.rabbitmq_retries,
+        retry_delay_seconds=s.rabbitmq_retry_delay,
     )

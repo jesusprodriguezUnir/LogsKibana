@@ -1,7 +1,5 @@
 README.md
 pyproject.toml
-src/scratch_rabbit.py
-src/scratch_test.py
 src/api/__init__.py
 src/api/main.py
 src/api/routes/__init__.py
@@ -13,7 +11,10 @@ src/kibana_logs_backend.egg-info/SOURCES.txt
 src/kibana_logs_backend.egg-info/dependency_links.txt
 src/kibana_logs_backend.egg-info/requires.txt
 src/kibana_logs_backend.egg-info/top_level.txt
+src/services/config.py
 src/services/csv_processor.py
+src/services/event_schemas.py
+src/services/logging_config.py
 src/services/payload_parsers.py
 src/services/query_engine.py
 src/services/rabbit_init.py

@@ -1,178 +1,32 @@
-import { useEffect, useState } from "react";
-import { requestJson } from "./services/api";
-import type { GroupResponse, LogRow, QueryFilters, SearchResponse } from "./types";
+import { useState } from "react";
 import { LevelBadge } from "./components/LevelBadge";
 import { MessageCell } from "./components/MessageCell";
 import { UploadDropzone } from "./components/UploadDropzone";
+import { GroupPanel, SummaryMiniPanel } from "./components/GroupPanels";
+import { MessageModal } from "./components/MessageModal";
+import { useLogQuery } from "./hooks/useLogQuery";
 
 const SORT_FIELDS = ["timestamp", "level", "service", "host", "logger", "location", "method", "status_code"];
 const DEFAULT_GROUP_FIELDS = ["level", "service", "logger", "location"];
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function buildQueryParams(
-  sessionId: string,
-  filters: QueryFilters,
-  groupFields: string[],
-  page: number,
-  pageSize: number,
-  sortBy: string,
-  sortOrder: string,
-): URLSearchParams {
-  const params = new URLSearchParams({ session_id: sessionId });
-  const set = (k: string, v: string) => { if (v) params.set(k, v); };
-  set("text",          filters.searchText);
-  set("level",         filters.level);
-  set("service",       filters.service);
-  set("host",          filters.host);
-  set("logger",        filters.logger);
-  set("location",      filters.location);
-  set("status_code",   filters.statusCode);
-  set("message_text",  filters.messageText);
-  set("logger_text",   filters.loggerText);
-  set("location_text", filters.locationText);
-  if (groupFields.length > 0) params.set("group_by", groupFields.join(","));
-  params.set("page",       String(page));
-  params.set("page_size",  String(pageSize));
-  params.set("sort_by",    sortBy);
-  params.set("sort_order", sortOrder);
-  return params;
-}
-
-const EMPTY_FILTERS: QueryFilters = {
-  searchText: "", level: "", service: "", host: "",
-  logger: "", location: "", statusCode: "",
-  messageText: "", loggerText: "", locationText: "",
-};
-
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export function LogExplorer() {
-  const [sessionId,     setSessionId]     = useState("");
-  const [rowCount,      setRowCount]      = useState<number | undefined>(undefined);
-  const [loading,       setLoading]       = useState(false);
-  const [error,         setError]         = useState("");
-  const [filters,       setFilters]       = useState<QueryFilters>(EMPTY_FILTERS);
-  const [rows,          setRows]          = useState<LogRow[]>([]);
-  const [total,         setTotal]         = useState(0);
-  const [groups,        setGroups]        = useState<GroupResponse | null>(null);
-  const [page,          setPage]          = useState(1);
-  const [pageSize,      setPageSize]      = useState(50);
-  const [sortBy,        setSortBy]        = useState("timestamp");
-  const [sortOrder,     setSortOrder]     = useState("desc");
-  const [groupFields,   setGroupFields]   = useState<string[]>(DEFAULT_GROUP_FIELDS);
+  const q = useLogQuery();
   const [selectedMessage, setSelectedMessage] = useState<string | null>(null);
-  const [copiedMessage, setCopiedMessage] = useState(false);
 
-  const canQuery = sessionId.length > 0;
-  const totalPages = Math.max(1, Math.ceil(total / pageSize));
-
-  const setFilter = (key: keyof QueryFilters, value: string) =>
-    setFilters((f) => ({ ...f, [key]: value }));
-
-  const toggleGroupField = (field: string) =>
-    setGroupFields((cur) =>
-      cur.includes(field) ? cur.filter((f) => f !== field) : [...cur, field],
-    );
-
-  // ── Upload ────────────────────────────────────────────────
-  async function handleUpload(file: File) {
-    setError("");
-    setLoading(true);
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      const data = await requestJson<{ session_id: string; rows: number }>("/upload", {
-        method: "POST",
-        body: form,
-      });
-      setSessionId(data.session_id);
-      setRowCount(data.rows);
-      setPage(1);
-      await runQuery(data.session_id, groupFields, 1, pageSize, sortBy, sortOrder, filters);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error inesperado");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  // ── Query ─────────────────────────────────────────────────
-  async function runQuery(
-    sid    = sessionId,
-    gf     = groupFields,
-    p      = page,
-    ps     = pageSize,
-    sb     = sortBy,
-    so     = sortOrder,
-    f      = filters,
-  ) {
-    if (!sid) return;
-    setError("");
-    setLoading(true);
-    const params = buildQueryParams(sid, f, gf, p, ps, sb, so);
-    try {
-      const [search, group] = await Promise.all([
-        requestJson<SearchResponse>(`/search?${params}`),
-        requestJson<GroupResponse>(`/group?${params}`),
-      ]);
-      setRows(search.items);
-      setTotal(search.total);
-      setPage(search.page);
-      setPageSize(search.page_size);
-      setSortBy(search.sort_by);
-      setSortOrder(search.sort_order);
-      setGroups(group);
-      setGroupFields(group.selected_group_fields);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Error inesperado");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  function handleSearch() {
-    void runQuery(sessionId, groupFields, 1, pageSize, sortBy, sortOrder, filters);
-  }
-
-  function handleSort(field: string) {
-    const newOrder = sortBy === field && sortOrder === "desc" ? "asc" : "desc";
-    setSortBy(field);
-    setSortOrder(newOrder);
-    void runQuery(sessionId, groupFields, 1, pageSize, field, newOrder, filters);
-  }
-
-  function exportCsv() {
-    if (!sessionId) return;
-    const params = buildQueryParams(sessionId, filters, [], page, pageSize, sortBy, sortOrder);
-    const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8000/api";
-    window.open(`${API_URL}/export?${params}`, "_blank");
-  }
+  const {
+    sessionId, rowCount, loading, error, filters, rows, total, groups,
+    page, pageSize, sortBy, sortOrder, groupFields, canQuery, totalPages,
+    setPageSize, setSortBy, setSortOrder,
+    setFilter, clearFilters, toggleGroupField,
+    runQuery, handleUpload, handleSearch, handleSort, exportCsv,
+  } = q;
 
   const availableGroupFields = groups?.available_group_fields ?? DEFAULT_GROUP_FIELDS;
   const topLoggers    = Object.entries(groups?.groups.logger      ?? {}).slice(0, 5);
   const topLocations  = Object.entries(groups?.groups.location    ?? {}).slice(0, 5);
   const topStatuses   = Object.entries(groups?.groups.status_code ?? {}).slice(0, 5);
-
-  useEffect(() => {
-    if (!selectedMessage) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSelectedMessage(null);
-      }
-    };
-
-    globalThis.addEventListener("keydown", onKeyDown);
-    return () => globalThis.removeEventListener("keydown", onKeyDown);
-  }, [selectedMessage]);
-
-  async function copySelectedMessage() {
-    if (!selectedMessage) return;
-    await navigator.clipboard.writeText(selectedMessage);
-    setCopiedMessage(true);
-    setTimeout(() => setCopiedMessage(false), 1500);
-  }
 
   return (
     <div className="page">
@@ -272,7 +126,7 @@ export function LogExplorer() {
           <button className="btn btn-secondary" disabled={!canQuery || loading} onClick={exportCsv}>
             ⬇ Exportar CSV
           </button>
-          <button className="btn btn-ghost btn-sm" disabled={!canQuery} onClick={() => { setFilters(EMPTY_FILTERS); }}>
+          <button className="btn btn-ghost btn-sm" disabled={!canQuery} onClick={clearFilters}>
             Limpiar filtros
           </button>
         </div>
@@ -458,81 +312,8 @@ export function LogExplorer() {
       )}
 
       {selectedMessage && (
-        <div
-          className="modal-backdrop"
-          onClick={(e) => {
-            if (e.currentTarget === e.target) {
-              setSelectedMessage(null);
-            }
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") {
-              setSelectedMessage(null);
-            }
-          }}
-          role="dialog"
-          aria-modal="true"
-          aria-label="Detalle de message"
-          tabIndex={-1}
-        >
-          <div className="modal message-modal">
-            <div className="modal__header">
-              <span className="modal__title">Detalle de message</span>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button className="btn btn-secondary btn-sm" onClick={() => void copySelectedMessage()}>
-                  Copiar
-                </button>
-                <button className="btn btn-ghost btn-sm" onClick={() => setSelectedMessage(null)}>
-                  Cerrar
-                </button>
-              </div>
-            </div>
-            {copiedMessage && <div className="copied-toast" style={{ marginBottom: 10 }}>Copiado</div>}
-            <pre className="message-modal__content">{selectedMessage}</pre>
-          </div>
-        </div>
+        <MessageModal message={selectedMessage} onClose={() => setSelectedMessage(null)} />
       )}
-    </div>
-  );
-}
-
-// ─── Sub-components ────────────────────────────────────────────────────────────
-
-function SummaryMiniPanel({ title, entries }: { title: string; entries: [string, number][] }) {
-  return (
-    <div className="stat-card">
-      <div className="stat-card__label">{title}</div>
-      <ul style={{ listStyle: "none", marginTop: 4 }}>
-        {entries.length === 0 && <li style={{ color: "var(--ink-faint)", fontSize: 12 }}>—</li>}
-        {entries.map(([k, v]) => (
-          <li key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 11, gap: 6 }}>
-            <span title={k} style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: "var(--ink-muted)" }}>{k}</span>
-            <strong style={{ flexShrink: 0, color: "var(--ink)" }}>{v}</strong>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function GroupPanel({ field, values }: { field: string; values: Record<string, number> }) {
-  const entries = Object.entries(values);
-  const max = entries.length > 0 ? Math.max(...entries.map(([, v]) => v)) : 1;
-  return (
-    <div className="group-panel">
-      <div className="group-panel__title">Por {field}</div>
-      <ul>
-        {entries.length === 0 && <li style={{ color: "var(--ink-faint)", fontSize: 12 }}>Sin datos</li>}
-        {entries.map(([key, count]) => (
-          <li key={key} style={{ flexDirection: "column", alignItems: "stretch", gap: 2 }}>
-            <div style={{ display: "flex", justifyContent: "space-between" }}>
-              <span className="group-panel__key" title={key}>{key}</span>
-              <span className="group-panel__count">{count}</span>
-            </div>
-            <div className="group-panel__bar" style={{ width: `${(count / max) * 100}%` }} />
-          </li>
-        ))}
-      </ul>
     </div>
   );
 }

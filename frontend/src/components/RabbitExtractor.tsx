@@ -294,7 +294,9 @@ export default function RabbitExtractor() {
     if (!sessionId || filteredRows.length === 0) return;
     try {
       const params = new URLSearchParams({ session_id: sessionId });
-      if (selectedRabbitNames.length > 0) params.set("message_text", selectedRabbitNames.join("|"));
+      // Contrato explícito: rabbit_names (OR literal en backend), en lugar del
+      // antiguo message_text="A|B" que dependía de regex implícito en pandas.
+      if (selectedRabbitNames.length > 0) params.set("rabbit_names", selectedRabbitNames.join(","));
       const resp = await fetch(buildApiUrl(`/export_zip?${params}`));
       if (!resp.ok) throw new Error(`Error en export ZIP: ${resp.statusText}`);
       const blob = await resp.blob();
